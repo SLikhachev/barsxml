@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: barsxml
+Version: 0.1
+Summary: make BARS XML packet from SQL
+Home-page: https://github.com/SLikhachev/barsxml
+Author: SLikhachev
+Author-email: polaughing@yahoo.com
+License: BSD2
+Description: # barsxml
+Platform: UNKNOWN
