@@ -7,8 +7,8 @@ def pmData(data):
     # here we set additional attrs
     # 1 - invoice
     # 2 - by soul
-    if not data.type_pay:
-        setattr(data, 'type_pay', 1)
+    if not data.get("type_pay", False):
+        data["type_pay"] = 1
     return data
 
 

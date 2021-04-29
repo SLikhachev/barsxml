@@ -1,6 +1,6 @@
 
 
-from barsxml.xml_class.utils import _iddokt, RowObject, ComposedData
+from barsxml.xml_class.utils import _iddokt, RowObject
 from barsxml.xml_class.mixTags import HdrMix, TagMix
 from barsxml.xml_class.utils import USL_PURP, USL_PRVS, \
     PROFOSM_PURP, SESTRY_PROF, STOM_PROF, REGION, ED_COL_IDSP
@@ -11,30 +11,30 @@ def hmData(data):
     # ksg: dict or None
 
     def _os_sluch(data):
-        return ('os_sluch', None if bool(data.ot) else 2)
+        return ("os_sluch", None if bool(data["ot"]) else 2)
 
     def __idsp(data):
 
         # neotl
-        if data.for_pom == 2:
+        if data["for_pom"] == 2:
             return 29
 
         # stom
-        if data.profil in STOM_PROF:
+        if data["profil"] in STOM_PROF:
             # stom inokray
-            if data.smo == 0:
-                if (data.visit_pol + data.visit_hom) == 1:
+            if data["smo"] == 0:
+                if (data["visit_pol"] + data["visit_hom"]) == 1:
                     return 29
                 return 30
             # just stom
             return 28
 
         # profosm or sestry
-        if data.purp in PROFOSM_PURP or data.profil in SESTRY_PROF:
+        if data["purp"] in PROFOSM_PURP or data["profil"] in SESTRY_PROF:
             return 28
 
         # 4 purp and prvs is USL (all spec issledovanie) inokray incl
-        if data.purp in USL_PURP and data.prvs in USL_PRVS:
+        if data["purp"] in USL_PURP and data["prvs"] in USL_PRVS:
             return 28
 
         # inokray 4 purp
@@ -42,18 +42,18 @@ def hmData(data):
         #    return 28
 
         # day stac
-        if data.usl_ok == 2:
+        if data["usl_ok"] == 2:
             return 33
 
         # pocesh
-        if (data.visit_pol + data.visit_hom) == 1:
+        if (data["visit_pol"] + data["visit_hom"]) == 1:
             return 29
 
         # obrash
         return 30
 
     def _idsp(data):
-        return ('idsp', data.idsp if data.idsp else __idsp(data))
+        return ('idsp', data.get("idsp", __idsp(data)))
 
     def _pcel(data):
         def pcel(for_pom, purp):
@@ -70,40 +70,35 @@ def hmData(data):
             return '2.6'  # Посещение по другим обстоятельствам
 
         return ('p_cel',
-                None if data.usl_ok != 3 else pcel(data.for_pom, data.purp))
+                None if data["usl_ok"] != 3 else pcel(data["for_pom"], data["purp"]))
 
     # Диспансерное наблюдение
     def _dn(data):
-        return ('dn', 1 if data.purp in (3, 10,)  else None)
+        return ('dn', 1 if data["purp"] in (3, 10,)  else None)
 
     def _vidpom(data):
-        if data.vidpom:
-            return ('vidpom', data.vidpom)
+        if data["vidpom"]:
+            return ('vidpom', data["vidpom"])
         
-        if data.profil in (78, 82):
+        if data["profil"] in (78, 82):
             vidpom = 11
             # MTR only since may 2020
-            if not data.smo:
+            if not data["smo"]:
                  vidpom = 13
-        elif data.prvs in (76, ) and data.profil in (97, 160):
+        elif data["prvs"] in (76, ) and data["profil"] in (97, 160):
             vidpom = 12
         else:
             vidpom = 13
         return ('vidpom', vidpom)
     
     def _det(data):
-        det = 0
-        if hasattr(data, 'det'):
-            det = data.det
-        return ('det', det)
+        return ('det', data.get("det", 0))
 
     def _summ(data):
-        s = float(data.sum_m) if data.sum_m else 0.0
-        return ('sum_m', s)
+        return ('sum_m', float(data.get("sum_m", 0)))
     
     def _sumv(data):
-        s = float(data.sumv) if data.sumv else 0.0
-        return ('sumv', s)
+        return ('sumv', float(data.get("sum_m", 0)))
 
     calc = (
         _os_sluch,
@@ -118,7 +113,7 @@ def hmData(data):
 
     for func in calc:
         t = func(data)
-        setattr(data, t[0], t[1])
+        data [t[0]] = t[1]
 
     return data
 
@@ -129,20 +124,26 @@ class HmUsl(RowObject):
         super().__init__(usl_data)
         
         self.lpu = f'{REGION}{mo}'
+
         if not self.profil:
-            self.profil = data.profil
-        self.det = data.det if data.det else 0
-        self.date_in = self.date_usl
-        self.date_out = self.date_usl
-        self.ds = data.ds1
+            self.profil = data["profil"]
+
+        self.det = data.get("det", 0)
+        _date = self.date_usl
+        if _date < data["date_1"] or _date > data["date_2"]:
+            _date = data["date_1"]
+        self.date_in = self.date_out = _date
+
+        self.ds = data["ds1"]
+
         if not self.prvs:
-            self.prvs = data.prvs
+            self.prvs = data["prvs"]
         
         # check code_md format
         if not self.code_md:
-            self.code_md = _iddokt(data.idcase, data.iddokt)
+            self.code_md = _iddokt(data["idcase"], data["iddokt"])
         else:
-            self.code_md = _iddokt(data.idcase, self.code_md)
+            self.code_md = _iddokt(data["idcase"], self.code_md)
         
         if getattr(self, 'sumv_usl', None) is None:
             self.sumv_usl = 0
@@ -161,7 +162,7 @@ class HmUsp(HmUsl):
 
     def __init__(self, mo, rdata, data):
         super().__init__(mo, rdata, data)
-        if data.idsp in (28, 29):
+        if data["idsp"] in (28, 29):
             self.code_usl = getattr(self, "code_usl1", None)
         else:
             self.code_usl = getattr(self, "code_usl2", None)
@@ -219,14 +220,13 @@ class KsgData:
 
         #kd = int(data.visit_hs + data.visit_ds)
         # as Pavlencov
-        kd = (data.date_2 - data.date_1).days + 1
-        assert kd > 0, f"{data.idcase}-ДС ноль койкодней"
-        setattr(data, 'kd_z', kd)
-        setattr(data, 'kd', kd)
+        kd = (data["date_2"] - data["date_1"]).days + 1
+        assert kd > 0, f'{data["idcase"]}-ДС ноль койкодней'
+        data["kd_z"] = data["kd"] = kd
         for k, v in ksg['ds'].items():
-            setattr(data, k, v)
+            data[k]=v
 
-        ksg_klass = type("Ksg", (ComposedData,), {})()
+        ksg_klass = type("Ksg", (object,), {})()
         for k, v in ksg["ksg"].items():
             setattr(ksg_klass, k, v)
 
@@ -238,8 +238,7 @@ class KsgData:
         for k in ("koef_z", "koef_up", "bztsz", "koef_d", "koef_u"):
             s *= ksg["ksg"][k]
         s = round(s, 2)
-        setattr(data, "sum_m", s)
-        setattr(data, "sumv", s)
+        data["sum_m"] = data["sumv"] = s
 
         return self
 
@@ -477,7 +476,7 @@ class HmZap(TagMix, KsgData):
         u_list = []
         for _usl in _list:
             usl = HmUsl(self.mo, _usl, data)
-            sum += float(_usl.sumv_usl) if _usl.sumv_usl else 0.0
+            sum += float( getattr(_usl, "sumv_usl", 0.0))
             ed_col += _usl.kol_usl
             """
             if stom:
@@ -498,18 +497,17 @@ class HmZap(TagMix, KsgData):
             sum += self.tariff
             setattr(self, 'tarif', '{0:.2f}'.format(self.tariff))
 
-        if data.sumv:
-            sum += float(data.sumv)
+        sum += float( data.get("sumv", 0) )
             
         summ = '{0:.2f}'.format(sum)
         #setattr(self, 'sum_m', summ)
         setattr(self, 'sumv', summ)
 
         self.ed_col = None
-        if not data.smo:
-            if data.idsp == 28:
+        if not data["smo"]:
+            if data["idsp"] == 28:
                 self.ed_col = ed_col
-            elif data.idsp == 29:
+            elif data["idsp"] == 29:
                 self.ed_col=1
         
         return self

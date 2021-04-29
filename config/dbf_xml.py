@@ -153,12 +153,11 @@ SELECT
     mr AS sumv
 FROM %s WHERE
     ist_fin=1 AND
-    ds_clin NOT LIKE 'D0%%' AND
-    ds_clin NOT LIKE 'D45%%' AND
-    ds_clin NOT LIKE 'D46%%' AND
-    ds_clin NOT LIKE 'D47%%' AND
-    ds_clin NOT LIKE 'C%%';
+    i_type=%s
 """
+
+ONKO= """ds_clin LIKE 'D0%%' OR ds_clin LIKE 'D45%%' OR ds_clin LIKE 'D46%%' 
+ OR ds_clin LIKE 'D47%%' OR ds_clin LIKE 'C%%';"""
 
 GET_RPS = """
 SELECT
@@ -172,6 +171,21 @@ SELECT
     '0.00'AS sumv_usl
 FROM %s WHERE nusl = ?
 """
+
+GET_ALL_RPS = """
+SELECT
+    nusl, 
+    date_in AS date_usl, 
+    kol_usl, 
+    prvs,
+    profil,
+    iddokt AS code_md,
+    code_nom AS code_usl,
+    281 AS podr,
+    '0.00'AS sumv_usl
+FROM %s
+"""
+
 
 get_spec_usl = """
 SELECT

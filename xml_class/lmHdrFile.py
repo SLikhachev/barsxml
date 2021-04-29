@@ -6,25 +6,25 @@ def lmData(data):
 
     def _pol(data):
         try:
-            return ('w', ['м', 'ж'].index(data.pol.lower()) + 1)
+            return ('w', ['м', 'ж'].index(data["pol"].lower()) + 1)
         except Exception as e:
             print(e)
             raise e
 
     def _dost(data):
         dost = []
-        if not bool(data.ot):
+        if not bool(data["ot"]):
             dost.append(1)
-        if not bool(data.fam):
+        if not bool(data["fam"]):
             dost.append(2)
-        if not (data.im):
+        if not (data["im"]):
             dost.append(3)
         return ('dost', dost)
 
     def _doc(data):
-        if not bool(data.docnum) or len(data.docnum) == 0:
+        if not bool(data["docnum"]) or len(data["docnum"]) == 0:
             for d in ('doctype', 'docnum', 'docser', 'docdate', 'docorg',):
-                setattr(data, d, None)
+                data[d] = None
         return None
 
     calc = (
@@ -37,7 +37,7 @@ def lmData(data):
         t = func(data)
         if t is None:
             continue
-        setattr(data, t[0], t[1])
+        data[ t[0] ] = t[1]
 
     return data
 
@@ -107,9 +107,9 @@ class LmPers(TagMix):
 
     def get_pers(self, data):
 
-        if data.id_pac in self.uniq:
-            self.dubl.append(data.id_pac)
+        if data["id_pac"] in self.uniq:
+            self.dubl.append(data["id_pac"])
             return None
 
-        self.uniq.add(data.id_pac)
+        self.uniq.add(data["id_pac"])
         return self.make_el(self.pers, data)

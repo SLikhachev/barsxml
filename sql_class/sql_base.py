@@ -21,7 +21,7 @@ class SqlBase(ABC):
         pass
 
     @abstractmethod
-    def get_hpm_data(self, get_fresh):
+    def get_hpm_data(self, type, get_fresh):
         pass
 
     @abstractmethod

@@ -75,7 +75,10 @@ class TagMix:
             return None
         # just leaf tag
         # get value from database object
-        val = getattr(obj, tag, None)
+        try:
+            val = obj.get(tag, None)
+        except:
+            val = getattr(obj, tag, None)
         # print(val)
         if val is None:
             val = getattr(self, tag, None)
@@ -83,7 +86,7 @@ class TagMix:
                 if tag in self.cnt:
                     val = self.next_item()
                 elif tag in self.required:
-                    raise AttributeError(f'{obj.idcase}-Нет тега: {tag} в талоне')
+                    raise AttributeError(f'{obj["idcase"]}-Нет тега: {tag} в талоне')
                 else:
                     return None
 
@@ -106,18 +109,22 @@ class TagMix:
                     if isinstance (el, ET.Element): 
                         proot.append(el)
             except Exception as e:
-                t= f'{obj.idcase}-Ошибка формиривания: TagError::  root: {root}, tag: {tag}, el: {el} '
+                t= f'{obj["idcase"]}-Ошибка формиривания: TagError::  root: {root}, tag: {tag}, el: {el} '
                 raise TagError(t, e)
 
         return proot
 
     def make_els(self, tags, obj):
-         elems = getattr(obj, tags[0], None)
-         if elems is None:
-             return None
+        try:
+            elems =  obj.get(tags[0], None)
+        except:
+            elems = getattr(obj, tags[0], None)
+
+        if elems is None:
+            return None
          # print(root, elems)
-         self.next_init(0)
-         return [self.make_el(tags, el) for el in elems]
+        self.next_init(0)
+        return [self.make_el(tags, el) for el in elems]
 
     def get_zag(self, data):
         return self.make_el( self.zglv, data )
