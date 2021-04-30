@@ -9,6 +9,7 @@ from barsxml.xml_class.utils import USL_PRVS
 
 class XmlRecords:
 
+    # very slow not implemented
     def proper_type(self, data) -> bool:
         if not hasattr(data, "idcase"):
             return False
