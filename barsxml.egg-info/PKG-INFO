@@ -1,4 +1,4 @@
-Metadata-Version: 1.0
+Metadata-Version: 2.1
 Name: barsxml
 Version: 0.1.1
 Summary: make BARS XML packet from SQL
@@ -8,3 +8,8 @@ Author-email: polaughing@yahoo.com
 License: BSD2
 Description: # barsxml
 Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3.6
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown

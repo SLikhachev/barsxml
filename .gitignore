@@ -1,4 +1,7 @@
 __pycache__/
+barsxml.egg-info/
+build/
+dist/
 *.py[cod]
 .idea/
 *.txt

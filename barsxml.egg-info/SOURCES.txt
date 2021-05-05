@@ -1,8 +1,13 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
 setup.py
 barsxml.egg-info/PKG-INFO
 barsxml.egg-info/SOURCES.txt
 barsxml.egg-info/dependency_links.txt
 barsxml.egg-info/not-zip-safe
+barsxml.egg-info/requires.txt
 barsxml.egg-info/top_level.txt
 config/__init__.py
 config/dbf_xml.py
