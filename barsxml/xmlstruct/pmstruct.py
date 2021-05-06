@@ -1,6 +1,7 @@
 
-from barsxml.xml_class.utils import RowObject
-from barsxml.xml_class.mixTags import HdrMix, TagMix
+from barsxml.xmlprod.utils import RowObject
+from barsxml.xmlmix.maketags import MakeTags
+from barsxml.xmlstruct.hdrstruct import HdrData
 
 
 def pmData(data):
@@ -68,7 +69,7 @@ class PmUsp(RowObject):
         '''
 
 
-class PmHdr(HdrMix):
+class PmHdr(HdrData):
 
     def __init__(self, mo, year, month, typ, pack, sd_z=None, summ=None):
         super().__init__(mo, year, month, typ, pack)
@@ -90,7 +91,7 @@ class PmHdr(HdrMix):
         self.schet = ('SCHET', self.schet_tags)
 
 
-class PmSluch(TagMix):
+class PmSluch(MakeTags):
 
     def __init__(self, mo):
         super().__init__(mo)

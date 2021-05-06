@@ -1,10 +1,7 @@
 __pycache__/
 barsxml.egg-info/
-build/
-dist/
+tests/
 *.py[cod]
-.idea/
 *.txt
-*.komodoproject
 
 

@@ -1,11 +1,11 @@
 
 
-from barsxml.sql_class.sql_base import get_sql_provider
-from barsxml.tests import dbf_config as config
+from barsxml.sql.sqlbase import get_sql_provider
+from barsxml.tests import xml_dbf_config as config
 
 
 def test_sql_module_name():
-    assert f"basexml.sql_class.sql_{config.SQL}" == "basexml.sql_class.sql_dbf"
+    assert f"basexml.sql.sql{config.SQL}" == "basexml.sql.sqldbf"
 
 def test_sql_class_init():
     sql = get_sql_provider(config).SqlProvider(config, "2021", "03")
@@ -37,11 +37,9 @@ HPM = (
     ("idsp", "33")
 )
 
-
-
 def test_get_hpm_npr_mo_usl():
     sql = get_sql_provider(config).SqlProvider(config, "2021", "03")
-    rrs = sql.get_hpm_data(False)
+    rrs = sql.get_hpm_data('app', False)
     assert len(list(rrs)) == 4
     r1 = list(rrs)[0]
     for attr, val in HPM:

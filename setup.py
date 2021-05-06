@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(name='barsxml',
-    version='0.1.1',
+    version='0.1.2',
     url='https://github.com/SLikhachev/barsxml',
     author='SLikhachev',
     author_email='polaughing@yahoo.com',
@@ -17,10 +17,12 @@ setup(name='barsxml',
         "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
     ],
-    #package_dir={"": "src"},
+    package_dir={'': 'barsxml'},
     python_requires=">=3.6",
+    
     packages=find_packages(
-        include=['config', 'path_class', 'xml_class'],
+        where = 'barsxml',
+        include=['config', 'path', 'sql', 'xmlmix', 'xmlprod', 'xmlstruct'],
         exclude=['tests']
     ),
     install_requires=['pyodbc >= 4.0.18', 'psycopg2 >= 2.7.3.2'], 

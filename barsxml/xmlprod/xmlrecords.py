@@ -1,10 +1,10 @@
 
 
 import xml.etree.cElementTree as ET
-from barsxml.xml_class.pmHdrFile import pmData
-from barsxml.xml_class.hmHdrFile import hmData
-from barsxml.xml_class.lmHdrFile import lmData
-from barsxml.xml_class.utils import USL_PRVS
+from barsxml.xmlstruct.pmstruct import pmData
+from barsxml.xmlstruct.hmstruct import hmData
+from barsxml.xmlstruct.lmstruct import lmData
+from barsxml.xmlprod.utils import USL_PRVS
 
 
 class XmlRecords:

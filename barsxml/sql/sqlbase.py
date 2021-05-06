@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 
 def get_sql_provider(config):
-    return importlib.import_module(f'barsxml.sql_class.sql_{config.SQL}')
+    return importlib.import_module(f'barsxml.sql.sql{config.SQL}')
 
 
 class SqlBase(ABC):
@@ -41,7 +41,7 @@ class SqlBase(ABC):
         pass
 
     @abstractmethod
-    def set_error(self, data, error):
+    def set_error(self, idcase, card, error):
         pass
 
     @abstractmethod

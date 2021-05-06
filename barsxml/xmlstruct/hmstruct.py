@@ -1,8 +1,9 @@
 
 
-from barsxml.xml_class.utils import _iddokt, RowObject
-from barsxml.xml_class.mixTags import HdrMix, TagMix
-from barsxml.xml_class.utils import USL_PURP, USL_PRVS, \
+from barsxml.xmlprod.utils import _iddokt, RowObject
+from barsxml.xmlmix.maketags import MakeTags
+from barsxml.xmlstruct.hdrstruct import HdrData
+from barsxml.xmlprod.utils import USL_PURP, USL_PRVS, \
     PROFOSM_PURP, SESTRY_PROF, STOM_PROF, REGION, ED_COL_IDSP
 
 
@@ -168,7 +169,7 @@ class HmUsp(HmUsl):
             self.code_usl = getattr(self, "code_usl2", None)
         
 
-class HmHdr(HdrMix):
+class HmHdr(HdrData):
 
     def __init__(self, mo: str, year: str, month:str, typ: int,  pack: str, sd_z: int, sumv: float):
         super().__init__(mo, year, month, typ, pack)
@@ -243,7 +244,7 @@ class KsgData:
         return self
 
 
-class HmZap(TagMix, KsgData):
+class HmZap(MakeTags, KsgData):
 
     # this calcs ourself
 

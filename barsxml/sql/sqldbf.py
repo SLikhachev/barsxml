@@ -1,10 +1,10 @@
 
 import pyodbc
-from barsxml.config.xml_type import TYPES
-from barsxml.sql_class.sql_base import SqlBase
+from barsxml.config.xmltype import TYPES
+from barsxml.sql.sqlbase import SqlBase
+
 
 # DBF Sql PROVIDER
-
 class SqlProvider(SqlBase):
     
     def __init__(self, config, year, month):
@@ -16,7 +16,7 @@ class SqlProvider(SqlBase):
 
     def dbf_connect(self):
         self.db_dir = self.config.RR_DIR
-        #print("DBF dir ", self.db_dir)
+        print("DBF dir ", self.db_dir)
         conns = "Driver={Microsoft dBASE Driver (*.dbf)};DefaultDir=%s" % self.db_dir
         self.db = pyodbc.connect(conns, autocommit=True)
         self.rr = f'RR{self.dbfn}.dbf'

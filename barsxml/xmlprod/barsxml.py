@@ -5,14 +5,14 @@ from tempfile import TemporaryFile as tmpf
 # NO reason
 #from concurrent.futures import ThreadPoolExecutor, as_completed
 #from functools import reduce
-from barsxml.config.xml_type import TYPES
-from barsxml.sql_class.sql_base import get_sql_provider
-from barsxml.xml_class.xmlRecords import XmlRecords
-from barsxml.xml_class.pmHdrFile import PmHdr, PmSluch
-from barsxml.xml_class.hmHdrFile import HmHdr, HmZap
-from barsxml.xml_class.lmHdrFile import LmHdr, LmPers
-from barsxml.xml_class.mixTags import HdrMix
-from barsxml.xml_class.utils import data_checker
+from barsxml.config.xmltype import TYPES
+from barsxml.sql.sqlbase import get_sql_provider
+from barsxml.xmlprod.xmlrecords import XmlRecords
+from barsxml.xmlstruct.pmstruct import PmHdr, PmSluch
+from barsxml.xmlstruct.hmstruct import HmHdr, HmZap
+from barsxml.xmlstruct.lmstruct import LmHdr, LmPers
+from barsxml.xmlstruct.hdrstruct import HdrData
+from barsxml.xmlprod.utils import data_checker
 
 
 class BarsXml(XmlRecords):
@@ -157,7 +157,7 @@ class BarsXml(XmlRecords):
             to_zip.append(self.write_hdr(h, f, sd_z=rc, summ='0.00'))
             f.close()
 
-        hdr = HdrMix(self.mo_code, self.year, self.month, self.pack_digit, self.pack)
+        hdr = HdrData(self.mo_code, self.year, self.month, self.pack_digit, self.pack)
         os.chdir(self.xmldir)
         self.zfile = f'{hdr.pack_name}'
         with zipfile.ZipFile(self.zfile, 'w', compression=zipfile.ZIP_DEFLATED) as zipH:
@@ -173,9 +173,10 @@ class BarsXml(XmlRecords):
 
         # no right records found
         if not bool(rc):
-            for f in (self.hmFile, self.pmFile, self.lmFile):
-                if f:
-                    f.close()
+            for f in ('hmFile', 'pmFile', 'lmFile'):
+                if hasattr(self, f):
+                    fd = getattr(self, f)
+                    fd.close()
 
         self.sql.close()
 
@@ -183,5 +184,6 @@ class BarsXml(XmlRecords):
         if len(self.zfile) > 0:
             zipname = os.path.join(self.xmldir, self.zfile)
 
+        pers = self.lmPers.uniq if hasattr(self, 'lmPers') else ()
         # rows wrote, person wrote, zipfile name, errors found
-        return rc, len(self.lmPers.uniq), zipname, self.errors
+        return rc, len(pers), zipname, self.errors

@@ -1,5 +1,6 @@
 
-from barsxml.xml_class.mixTags import HdrMix, TagMix
+from barsxml.xmlmix.maketags import MakeTags
+from barsxml.xmlstruct.hdrstruct import HdrData
 
 
 def lmData(data):
@@ -42,7 +43,7 @@ def lmData(data):
     return data
 
 
-class LmHdr(HdrMix):
+class LmHdr(HdrData):
 
     def __init__(self, mo, year, month, typ, pack, sd_z=None, summ=None):
         super().__init__(mo, year, month, typ, pack)
@@ -64,7 +65,7 @@ class LmHdr(HdrMix):
         return None
 
 
-class LmPers(TagMix):
+class LmPers(MakeTags):
 
     def __init__(self, mo):
         super().__init__(mo)

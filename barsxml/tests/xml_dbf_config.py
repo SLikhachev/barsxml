@@ -1,6 +1,6 @@
 
-from barsxml.path_class.thisPath import Path
-from barsxml.config.dbf_xml import *
+from barsxml.path.thispath import Path
+from barsxml.config.dbfxml import *
 
 
 tests_dir = Path.script_dir()
