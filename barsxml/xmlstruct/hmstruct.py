@@ -78,7 +78,7 @@ def hmData(data):
         return ('dn', 1 if data["purp"] in (3, 10,)  else None)
 
     def _vidpom(data):
-        if data["vidpom"]:
+        if data.get("vidpom", None):
             return ('vidpom', data["vidpom"])
         
         if data["profil"] in (78, 82):
@@ -123,31 +123,24 @@ class HmUsl(RowObject):
 
     def __init__(self, mo, usl_data, data):
         super().__init__(usl_data)
-        
         self.lpu = f'{REGION}{mo}'
-
-        if not self.profil:
-            self.profil = data["profil"]
-
+        self.profil = getattr(self, 'profil', data["profil"])
         self.det = data.get("det", 0)
-        _date = self.date_usl
+
+        _date = getattr(self, 'date_usl', data['date_1'])
         if _date < data["date_1"] or _date > data["date_2"]:
             _date = data["date_1"]
         self.date_in = self.date_out = _date
 
         self.ds = data["ds1"]
-
-        if not self.prvs:
-            self.prvs = data["prvs"]
+        self.prvs = getattr(self, 'prvs', data["prvs"])
         
         # check code_md format
-        if not self.code_md:
-            self.code_md = _iddokt(data["idcase"], data["iddokt"])
-        else:
-            self.code_md = _iddokt(data["idcase"], self.code_md)
-        
-        if getattr(self, 'sumv_usl', None) is None:
-            self.sumv_usl = 0
+        self.code_md = _iddokt(
+            data["idcase"],
+            getattr(self, 'code_md', data["iddokt"])
+        )
+        self.sumv_usl = getattr(self, 'sumv_usl', 0.0)
 
 
 class HmUsp(HmUsl):
@@ -167,6 +160,7 @@ class HmUsp(HmUsl):
             self.code_usl = getattr(self, "code_usl1", None)
         else:
             self.code_usl = getattr(self, "code_usl2", None)
+        self.kol_usl = 1
         
 
 class HmHdr(HdrData):
@@ -477,8 +471,8 @@ class HmZap(MakeTags, KsgData):
         u_list = []
         for _usl in _list:
             usl = HmUsl(self.mo, _usl, data)
-            sum += float( getattr(_usl, "sumv_usl", 0.0))
-            ed_col += _usl.kol_usl
+            sum += float(usl.sumv_usl)  #float( getattr(_usl, "sumv_usl", 0.0))
+            ed_col += usl.kol_usl
             """
             if stom:
                 setattr(usl, 'sumv_usl', '%.2f' %
@@ -500,9 +494,9 @@ class HmZap(MakeTags, KsgData):
 
         sum += float( data.get("sumv", 0) )
             
-        summ = '{0:.2f}'.format(sum)
+        data["sumv"] = '{0:.2f}'.format(sum)
         #setattr(self, 'sum_m', summ)
-        setattr(self, 'sumv', summ)
+        #setattr(self, 'sumv', summ)
 
         self.ed_col = None
         if not data["smo"]:

@@ -30,27 +30,14 @@ class SqlProvider(SqlBase):
     
     def get_hpm_data(self, type, get_fresh):
         get_rrs = self.config.GET_RRS % (self.rr, TYPES[type])
-        #curs = self.db.cursor()
-        rrs = self.curs.execute(get_rrs).fetchall()
-        #curs.close()
-        return rrs
-
-    def get_ksg_data(self, data):
-        if getattr(data, 'n_ksg', None) is None:
-            return None
-        ksg = self.config.KSG
-        ksg["n_ksg"] = f"ds{data.n_ksg}"
-        return dict(ds=self.config.DS, ksg=ksg)
+        return self.curs.execute(get_rrs).fetchall()
 
     def get_npr_mo(self, nmo):
         return nmo
             
     def get_usl(self, data):
         get_rps = self.config.GET_RPS % self.rp
-        #curs = self.db.cursor()
-        rps = self.curs.execute(get_rps, (data.idcase,)).fetchall()
-        #curs.close()
-        return rps
+        return self.curs.execute(get_rps, (data.idcase,)).fetchall()
 
     def get_all_usl(self):
         get_rps = self.config.GET_ALL_RPS % self.rp
@@ -63,7 +50,10 @@ class SqlProvider(SqlBase):
         # curs.close()
         #return rps
 
-    def _get_usl(self, idcase):
+    def get_all_usp(self):
+        pass
+
+    def get_pmu_usl(self, idcase):
         return self.usl.get(idcase, [])
 
     def get_spec_usl(self, data):

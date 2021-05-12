@@ -9,41 +9,6 @@ from barsxml.xmlprod.utils import USL_PRVS
 
 class XmlRecords:
 
-    # very slow not implemented
-    def proper_type(self, data) -> bool:
-        if not hasattr(data, "idcase"):
-            return False
-        f = getattr(self, self.pack_type, False)
-        if callable(f):
-            return f(data)
-        return False
-
-    # ambul polic
-    def app(self, data):
-        return not any(
-            map( lambda f: f(data), [self.dsc, self.pcr, self.ifa] )
-        )
-
-    # day stac
-    def dsc(self, data):
-        if bool(data.n_ksg):
-            return True
-        return False
-
-    def pcr(self, data):
-        if data.ds1 == self._xpcr["ds"] and data.specfic == self._xpcr["specfic"]:
-            return True
-        return False
-
-    def ifa(self, data):
-        if data.ds1 == self._xifa["ds"] and data.specfic == self._xifa["specfic"] \
-                and data.rslt == self._xifa["rslt"]:
-            return True
-        return False
-
-    def tra(self, data):
-        return True
-
     def write_hdr(self, hdr, tmp_file, sd_z=0, summ='0.00'):
         _hdr = hdr(self.mo_code, self.year, self.month, self.pack_digit, self.pack, sd_z, summ)
         _fname = f"{_hdr.filename}.xml"
@@ -117,10 +82,9 @@ class XmlRecords:
             self.lmFile.write('\n')
 
     def get_npr_mo(self, data):
-        if bool(getattr(data, "cons_mo", None)):
-            nmo = data.cons_mo
-        elif bool(getattr(data, "hosp_mo", None)):
-            nmo = data.hosp_mo
-        else:
-            return None
-        return self.sql.get_npr_mo(nmo)
+        if getattr(data, "npr_mo", None) is not None:
+            return self.sql.get_npr_mo(data.npr_mo)
+        if getattr(data, "from_firm", None) is not None:
+            return self.sql.get_npr_mo(data.from_firm)
+        return None
+        

@@ -14,7 +14,6 @@ class SqlBase(ABC):
         self.year = year
         self.month = month
         self.ye_ar = year[2:] # last 2 digits as str
-        self.truncate_errors()
 
     @abstractmethod
     def truncate_errors(self):
@@ -24,16 +23,25 @@ class SqlBase(ABC):
     def get_hpm_data(self, type, get_fresh):
         pass
 
-    @abstractmethod
-    def get_ksg_data(self, get_fresh):
-        pass
+    def get_ksg_data(self, data):
+        if getattr(data, 'n_ksg', None) is None:
+            return None
+        ksg = getattr(self.config, 'KSG', {})
+        if len(ksg) == 0:
+            raise AttributeError('KSG not provided by Config')
+        ksg["n_ksg"] = f"ds{data.n_ksg}"
+        ds = getattr(self.config, 'DS', {})
+        if len(ds) == 0:
+            raise AttributeError('DS not provided by Config')
+        ksg["n_ksg"] = f"ds{data.n_ksg}"
+        return dict(ds=ds, ksg=ksg)
 
     @abstractmethod
     def get_npr_mo(self, data):
         pass
 
     @abstractmethod
-    def get_usl(self, data):
+    def get_pmu_usl(self, data):
         pass
 
     @abstractmethod

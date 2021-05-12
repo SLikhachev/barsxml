@@ -179,33 +179,26 @@ def _visits(id, d):
 def _naprav_cons(id, d):
     '''
         tal.npr_date,
-        tal.npr_mo as cons_mo,
-        tal.hosp_mo,
+        tal.npr_mo as from_firm,
         tal.naprlech,
         tal.nsndhosp,
         tal.d_type,
     '''
 # diagnostic
-    if (d["prvs"] in USL_PRVS) and (d["for_pom"] != 2):
-        if bool(d["from_firm"]):
-        #if self.mo_att != self.mo:
-            assert bool(d["naprlech"]) and bool(
-                d["npr_mo"]), f'{id}-Диагностика, нет прикрепления, напаравления, МО направления'
+    if d["npr_mo"] and d.get("naprlech", None):
+        d["npr_date"] = d["date_1"]
+        return
+    
+    if (d["prvs"] in USL_PRVS) and (d["for_pom"] == 3):
+    # planovaya
+        if d["mo_att"] != d["mo"]:
+            assert False, f'{id}-Диагностика, нет Напаравления, МО направления'
         else:
             # diagnostic in self MO
-            d["npr_mo"] = f'{REGION}{d["mo"]}'
-            d["npr_date"] = d["date_1"]
+            d["npr_mo"] = None #f'{REGION}{d["mo"]}'
+            d["npr_date"] = None #d["date_1"]
             d["from_firm"] = None
             d["naprlech"] = None
-
-    if bool(d["naprlech"]):
-        assert bool(d["npr_mo"]), f'{id}-Нет МО направления NPR_MO'
-        d["npr_date"] = d["date_1"]
-        d["from_firm"] = fmt_000(d["npr_mo"])
-    else:
-        d["npr_date"] = None
-        d["from_firm"] = None
-
 
 def _naprav_hosp(id, d):
     # hospital from self MO
@@ -290,6 +283,11 @@ def _pacient(id, d):
          d["docdate"], d["docorg"] = None, None
     # self.os_sluch= 2 if self.dost.find('1') > 0 else None
 
+def _d_type(id, d):
+    d["d_type"] = None 
+    if d.get("ot", None) is None:
+        d["d_type"] = 5 
+    
 
 def rec_to_dict(rec):
     if hasattr(rec, "_asdict"):
@@ -310,8 +308,7 @@ def data_checker(rec, mo_code, napr_mo):
 
     d["mo"] = mo_code # str(3) 228
     d["npr_mo"] = napr_mo  # str(6) 250228
-    if d.get("mo_att", None) is None:
-        d["mo_att"] = None
+    d["mo_att"] = d.get("mo_att", mo_code)
 
     fns = (
         _date,
@@ -322,7 +319,8 @@ def data_checker(rec, mo_code, napr_mo):
         _naprav_hosp,
         _diag,
         _doct,
-        _pacient
+        _pacient,
+        _d_type
     )
     for func in fns:
         func(d["idcase"], d)

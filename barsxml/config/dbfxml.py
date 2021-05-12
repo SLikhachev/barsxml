@@ -120,7 +120,6 @@ SELECT
 
     smo, 
     npr_mo,
-    npr_mo AS cons_mo,
     
     prvs,
     iddokt,

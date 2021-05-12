@@ -33,8 +33,8 @@ class BarsXml(XmlRecords):
         self.xmldir = f"{config.BASE_XML_DIR}\\{type}\\"  # str abs path to save xml file
         self.error_file = f"errors_{type}"
         self.errorFile = None
-        self._xpcr = config.PCR
-        self._xifa = config.IFA
+        #self._xpcr = config.PCR
+        #self._xifa = config.IFA
 
         self.year = config.YEAR  # string(4) digits
         self.month = month  # string(2) digits
@@ -48,7 +48,6 @@ class BarsXml(XmlRecords):
         self.sql = get_sql_provider(config).SqlProvider(config, self.year, month)
 
         # init xml objects
-
 
     def init_files(self):
 
@@ -79,20 +78,15 @@ class BarsXml(XmlRecords):
             #raise Exception("Length of the fetched sql data is zero ")
 
         self.init_files()
-        # test read speed
-        #for rdata_row in rdata:
-        #    id = rdata_row.idcase
-        #    rc += 1
-        #return self.close(rc)
-
-        usl = self.sql.get_all_usl()
-
+        self.sql.get_all_usp()
+        self.sql.get_all_usl()
+        
         # rc = reduce(self.process(mark_sent), rdata, 0)
         # instead reduce make straight loop (better performance)
         for rdata_row in rdata:
             self.ksg = self.sql.get_ksg_data(rdata_row)  # dict
             nmo = self.get_npr_mo(rdata_row)
-            self.usl = self.sql._get_usl(rdata_row.idcase)
+            self.usl = self.sql.get_pmu_usl(rdata_row.idcase)
             # specaial usl for posesh obrasch
             self.usp = self.sql.get_spec_usl(rdata_row)
             try:
