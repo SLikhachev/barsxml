@@ -81,10 +81,4 @@ class XmlRecords:
             ET.ElementTree(pers).write(self.lmFile, encoding="unicode")
             self.lmFile.write('\n')
 
-    def get_npr_mo(self, data):
-        if getattr(data, "npr_mo", None) is not None:
-            return self.sql.get_npr_mo(data.npr_mo)
-        if getattr(data, "from_firm", None) is not None:
-            return self.sql.get_npr_mo(data.from_firm)
-        return None
-        
+       

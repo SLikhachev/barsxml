@@ -85,7 +85,7 @@ class BarsXml(XmlRecords):
         # instead reduce make straight loop (better performance)
         for rdata_row in rdata:
             self.ksg = self.sql.get_ksg_data(rdata_row)  # dict
-            nmo = self.get_npr_mo(rdata_row)
+            nmo = self.sql.get_npr_mo(rdata_row)
             self.usl = self.sql.get_pmu_usl(rdata_row.idcase)
             # specaial usl for posesh obrasch
             self.usp = self.sql.get_spec_usl(rdata_row)

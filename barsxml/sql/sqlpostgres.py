@@ -41,9 +41,11 @@ class SqlProvider(SqlBase):
             (self.talon_tbl, int(self.month), get_fresh))
         return self.qurs.fetchall()
 
-    def get_npr_mo(self, nmo):
-        return self.mo_local.get(nmo, None)
-
+    def get_npr_mo(self, data):
+        if hasattr(data, 'from_firm'):
+            return self.mo_local.get(data.from_firm, None)
+        return None
+    
     def get_all_usl(self):
         self.qurs1.execute(self.config.GET_ALL_USL, (
             self.talon_tbl, self.para_tbl, int(self.month)))

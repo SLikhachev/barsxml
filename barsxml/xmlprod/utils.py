@@ -178,31 +178,40 @@ def _visits(id, d):
 # приняли на консультацию
 def _naprav_cons(id, d):
     '''
-        tal.npr_date,
+        tal.npr_date 
         tal.npr_mo as from_firm,
         tal.naprlech,
         tal.nsndhosp,
         tal.d_type,
     '''
-# diagnostic
-    if d["npr_mo"] and d.get("naprlech", None):
-        d["npr_date"] = d["date_1"]
+# if set then return
+    if d["npr_mo"] and d["naprlech"]:
+        if d.get("npr_date", None) is None:
+            d["npr_date"] = d["date_1"]
         return
     
+    # diagnostic planovaya
     if (d["prvs"] in USL_PRVS) and (d["for_pom"] == 3):
-    # planovaya
-        if d["mo_att"] != d["mo"]:
-            assert False, f'{id}-Диагностика, нет Напаравления, МО направления'
+    # other MO need napravlenie
+        if d["from_firm"] != d["mo"]:
+            assert False, f'{id}-Диагностика, нет Напаравления или МО направления'
         else:
-            # diagnostic in self MO
-            d["npr_mo"] = None #f'{REGION}{d["mo"]}'
-            d["npr_date"] = None #d["date_1"]
-            d["from_firm"] = None
+            # diagnostic in self MO no naprav needed
+            d["npr_mo"] = f'{REGION}{d["mo"]}'
+            d["npr_date"] = d["date_1"]
+            #d["from_firm"] = None
             d["naprlech"] = None
 
+    # DS
+    if d["usl_ok"] == 2:
+        assert d.get("naprlech", False), f'{id}-ДС, нет Напаравления'
+        d["npr_mo"] = f'{REGION}{d["mo"]}'
+        d["npr_date"] = d["date_1"]
+        d["from_firm"] = d["mo"]
+    
 def _naprav_hosp(id, d):
     # hospital from self MO
-    if bool(d["nsndhosp"]):
+    if d.get("nsndhosp", None) is not None:
         d["from_firm"] = d["mo"]
 
 
@@ -307,8 +316,12 @@ def data_checker(rec, mo_code, napr_mo):
     d= rec_to_dict(rec)
 
     d["mo"] = mo_code # str(3) 228
-    d["npr_mo"] = napr_mo  # str(6) 250228
-    d["mo_att"] = d.get("mo_att", mo_code)
+    # in rec we have only from_firm
+    d["npr_mo"] = napr_mo  # str(6) 250228 or None
+    if d.get("mo_att", None) is None:
+        d["mo_att"] = mo_code 
+    if d.get("from_firm", None) is None:
+        d["from_firm"] = mo_code
 
     fns = (
         _date,

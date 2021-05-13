@@ -32,8 +32,8 @@ class SqlProvider(SqlBase):
         get_rrs = self.config.GET_RRS % (self.rr, TYPES[type])
         return self.curs.execute(get_rrs).fetchall()
 
-    def get_npr_mo(self, nmo):
-        return nmo
+    def get_npr_mo(self, data):
+        return getattr(data, 'npr_mo', None)
             
     def get_usl(self, data):
         get_rps = self.config.GET_RPS % self.rp
