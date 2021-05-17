@@ -127,11 +127,11 @@ class HmUsl(RowObject):
         self.profil = getattr(self, 'profil', data["profil"])
         self.det = data.get("det", 0)
 
-        _date = getattr(self, 'date_usl', data['date_1'])
-        if _date < data["date_1"] or _date > data["date_2"]:
-            _date = data["date_1"]
-        self.date_in = self.date_out = _date
-
+        _date1 = getattr(self, 'date_usl', data['date_1'])
+        if _date1 < data["date_1"] or _date1 > data["date_2"]:
+            _date1 = data["date_1"]
+        self.date_in = _date1
+        self.date_out = getattr(self, 'date_out', data['date_2'])
         self.ds = data["ds1"]
         self.prvs = getattr(self, 'prvs', data["prvs"])
         
@@ -140,7 +140,7 @@ class HmUsl(RowObject):
             data["idcase"],
             getattr(self, 'code_md', data["iddokt"])
         )
-        self.sumv_usl = getattr(self, 'sumv_usl', 0.0)
+        self.sumv_usl = getattr(self, 'sumv_usl', 0)
 
 
 class HmUsp(HmUsl):
@@ -161,7 +161,7 @@ class HmUsp(HmUsl):
         else:
             self.code_usl = getattr(self, "code_usl2", None)
         self.kol_usl = 1
-        
+
 
 class HmHdr(HdrData):
 

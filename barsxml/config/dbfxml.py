@@ -98,8 +98,6 @@ SELECT
     date_out AS date_z_2,
     date_in AS date_1,
     date_out AS date_2,
-    date_in AS npr_date,
-    
     code_mes AS n_ksg,
     
     ds_clin AS ds1,
@@ -160,28 +158,30 @@ ONKO= """ds_clin LIKE 'D0%%' OR ds_clin LIKE 'D45%%' OR ds_clin LIKE 'D46%%'
 
 GET_RPS = """
 SELECT
-    date_in AS date_usl, 
+    date_in AS date_usl,
+    date_p AS date_out,
     kol_usl, 
     prvs,
     profil,
     iddokt AS code_md,
     code_nom AS code_usl,
-    281 AS podr,
-    '0.00'AS sumv_usl
+    SUBSTRING(executor, 3, 3) AS podr,
+    '0'AS sumv_usl
 FROM %s WHERE nusl = ?
 """
 
 GET_ALL_RPS = """
 SELECT
     nusl, 
-    date_in AS date_usl, 
+    date_in AS date_usl,
+    date_p AS date_out,
     kol_usl, 
     prvs,
     profil,
     iddokt AS code_md,
     code_nom AS code_usl,
-    281 AS podr,
-    '0.00'AS sumv_usl
+    mid(executor, 4, 3) AS podr,
+    '0'AS sumv_usl
 FROM %s
 """
 

@@ -191,15 +191,22 @@ def _naprav_cons(id, d):
         return
     
     # diagnostic planovaya
-    if (d["prvs"] in USL_PRVS) and (d["for_pom"] == 3):
+    if ( int(d["prvs"]) in USL_PRVS) and int(d["for_pom"]) == 3:
     # other MO need napravlenie
+        # ----------------------
+        # this code is a just durty hack
+        # these records need to drop out 
+        if d.get("from_firm", None) is None:
+            d["from_firm"] = d["mo"]
+        #  ---------------------
         if d["from_firm"] != d["mo"]:
+            # 
             assert False, f'{id}-Диагностика, нет Напаравления или МО направления'
         else:
             # diagnostic in self MO no naprav needed
             d["npr_mo"] = f'{REGION}{d["mo"]}'
             d["npr_date"] = d["date_1"]
-            #d["from_firm"] = None
+            d["from_firm"] = d["mo"]
             d["naprlech"] = None
 
     # DS
@@ -320,9 +327,11 @@ def data_checker(rec, mo_code, napr_mo):
     d["npr_mo"] = napr_mo  # str(6) 250228 or None
     if d.get("mo_att", None) is None:
         d["mo_att"] = mo_code 
+    """
     if d.get("from_firm", None) is None:
         d["from_firm"] = mo_code
-
+    """
+    
     fns = (
         _date,
         _smo_polis,
