@@ -32,19 +32,15 @@ class XmlRecords:
 
         return _fname
 
-
     def write_sluch(self, stom=None):
         # now DICT
         data = pmData(self.data)
-        '''
-        assert (data.specfic in dcons) and len(
-            usl) > 0, f'{data.idcase}-Для спец. {data.specfic} нет ПМУ'
-        '''
+
         if data["prvs"] in USL_PRVS:
             assert len(self.usl) > 0, \
                 f'{data["idcase"]}-Случай SL tag : Для SPEC {data["specfic"]}, PRVS. {data["prvs"]} нет ПМУ'
 
-        self.pmSluch.set_usl('usl', data, self.usl, self.usp)
+        self.pmSluch.set_usl('usl', self.usl, self.usp)
         if stom and len(stom) > 0:
             self.pmSluch.set_usl('stom', stom)
 
@@ -68,9 +64,6 @@ class XmlRecords:
             return
         ET.ElementTree(zap).write(self.hmFile, encoding="unicode")
         self.hmFile.write('\n')
-
-        # if data.q_u == 3:
-        #    hm.reset_ksg()
 
     def write_pers(self):
         pers = self.lmPers.get_pers( lmData(self.data) )

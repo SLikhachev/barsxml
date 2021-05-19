@@ -1,11 +1,13 @@
 
 
 import os, zipfile
+from time import time
 from tempfile import TemporaryFile as tmpf
 # NO reason
 #from concurrent.futures import ThreadPoolExecutor, as_completed
 #from functools import reduce
 from barsxml.config.xmltype import TYPES
+from barsxml.path.thispath import Path
 from barsxml.sql.sqlbase import get_sql_provider
 from barsxml.xmlprod.xmlrecords import XmlRecords
 from barsxml.xmlstruct.pmstruct import PmHdr, PmSluch
@@ -27,11 +29,14 @@ class BarsXml(XmlRecords):
         # pcr - pcr 7n
         # ifa  ifa 8n
         # tra - travma 9n
+        # xml - for simple packages of diagnistic 0
         self.pack_type = type  # = (pack_type, pack_digit)
         self.pack_digit = TYPES[type]
         self.mo_code = config.MO_CODE  # string(3) head MO code
-        self.xmldir = f"{config.BASE_XML_DIR}\\{type}\\"  # str abs path to save xml file
-        self.error_file = f"errors_{type}"
+        self.xmldir = Path( str(config.BASE_XML_DIR) )
+        if len(type) > 0:
+            self.xmldir = self.xmldir / type   # str abs path to save xml file
+        self.error_file_name = self.xmldir / f"errors_{type}{str(time())[10:14]}.txt"
         self.errorFile = None
         #self._xpcr = config.PCR
         #self._xifa = config.IFA
@@ -55,8 +60,7 @@ class BarsXml(XmlRecords):
         self.hmZap = HmZap(self.mo_code)
         self.lmPers = LmPers(self.mo_code)
 
-        self.errFname = f'{self.xmldir}\\{self.error_file}.txt'
-        self.errorFile = open(self.errFname, 'w')  # if test else None
+        self.errorFile = open(self.error_file_name, "w")
 
         # make pack anyway if not check, just ignore all errors
         self.pmFile = tmpf(mode="r+") if not self.check else None
@@ -87,10 +91,9 @@ class BarsXml(XmlRecords):
             self.ksg = self.sql.get_ksg_data(rdata_row)  # dict
             nmo = self.sql.get_npr_mo(rdata_row)
             self.usl = self.sql.get_pmu_usl(rdata_row.idcase)
-            # specaial usl for posesh obrasch
+            # specaial usl for posesh / obrasch
             self.usp = self.sql.get_spec_usl(rdata_row)
             try:
-                #pass
                 self.data = data_checker(rdata_row, self.mo_code, nmo)
                 self.write_sluch()
                 self.write_zap()
@@ -107,6 +110,7 @@ class BarsXml(XmlRecords):
                 self.sql.mark_as_sent(rdata_row)
             rc += 1
 
+        # end loop of all data
         # make ZIP archive
         if rc > 0 and not self.check: #pass
             self.make_zip(rc)
@@ -119,7 +123,7 @@ class BarsXml(XmlRecords):
             #    return rc
 
             self.ksg = self.sql.get_ksg_data(rdata_row)  # dict
-            nmo = self.get_npr_mo(rdata_row)
+            nmo = self.sql.get_npr_mo(rdata_row)
             self.usl = self.sql._get_usl(rdata_row.idcase)
             # specaial usl for posesh obrasch
             self.usp = self.sql.get_spec_usl(rdata_row)
@@ -152,7 +156,7 @@ class BarsXml(XmlRecords):
             f.close()
 
         hdr = HdrData(self.mo_code, self.year, self.month, self.pack_digit, self.pack)
-        os.chdir(self.xmldir)
+        os.chdir(str(self.xmldir))
         self.zfile = f'{hdr.pack_name}'
         with zipfile.ZipFile(self.zfile, 'w', compression=zipfile.ZIP_DEFLATED) as zipH:
             for f in to_zip:
@@ -162,22 +166,22 @@ class BarsXml(XmlRecords):
         if bool(self.errorFile):
             self.errorFile.close()
             if self.errors == 0:
-                os.remove(self.errFname)
-                self.errFname = ''
+                os.remove(self.error_file_name)
+                self.error_file_name = ''
 
         # no right records found
         if not bool(rc):
             for f in ('hmFile', 'pmFile', 'lmFile'):
-                if hasattr(self, f):
-                    fd = getattr(self, f)
+                fd = getattr(self, f, None)
+                if fd:
                     fd.close()
 
         self.sql.close()
 
-        zipname = "No zip file wrote"
+        zipname = self.error_file_name
         if len(self.zfile) > 0:
-            zipname = os.path.join(self.xmldir, self.zfile)
+            zipname = self.xmldir / self.zfile
 
         pers = self.lmPers.uniq if hasattr(self, 'lmPers') else ()
         # rows wrote, person wrote, zipfile name, errors found
-        return rc, len(pers), zipname, self.errors
+        return rc, len(pers), str(zipname), self.errors

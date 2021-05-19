@@ -28,4 +28,3 @@ class HdrData(MakeTags):
         self.h_file = f'H{self.file}'
         self.l_file = f'L{self.file}'
         self.pack_name = f'H{self.code_mo}{self.year[-1]}{self.pack_month}{self.pack_num}.zip'
-        # print(self.year)

@@ -154,8 +154,8 @@ class HmUsp(HmUsl):
         tal.doc_code as doc,
     """
 
-    def __init__(self, mo, rdata, data):
-        super().__init__(mo, rdata, data)
+    def __init__(self, mo, usp_data, data):
+        super().__init__(mo, usp_data, data)
         if data["idsp"] in (28, 29):
             self.code_usl = getattr(self, "code_usl1", None)
         else:

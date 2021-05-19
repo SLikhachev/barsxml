@@ -47,11 +47,9 @@ class SqlProvider(SqlBase):
                 self.usl[rps.nusl] = [rps]
                 continue
             self.usl[rps.nusl].append(rps)
-        # curs.close()
-        #return rps
 
     def get_all_usp(self):
-        pass
+        return None
 
     def get_pmu_usl(self, idcase):
         return self.usl.get(idcase, [])

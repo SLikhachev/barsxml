@@ -9,7 +9,6 @@ def lmData(data):
         try:
             return ('w', ['м', 'ж'].index(data["pol"].lower()) + 1)
         except Exception as e:
-            print(e)
             raise e
 
     def _dost(data):

@@ -1,6 +1,5 @@
 
 import psycopg2, psycopg2.extras
-from barsxml.config.xmltype import TYPES
 from barsxml.sql.sqlbase import SqlBase
 
 
@@ -11,11 +10,14 @@ class SqlProvider(SqlBase):
         super().__init__(config, year, month)
         self.mo = self.config.MO_CODE
         self.db = getattr(config, 'db', None)
-        if self.db is None and hasattr(self.config, 'DB_CONN'):
-            self.db=psycopg2.connect(self.config.DB_CONN)
-        else:
-            raise AttributeError("DB_CONN not provided by Config")
-        
+        if self.db is None:
+            if hasattr(self.config, 'DB_CONN'):
+                self.db=psycopg2.connect(self.config.DB_CONN)
+            else:
+                raise AttributeError("DB_CONN attribute not provided by Config")
+        if self.db.closed == 1:
+            raise EnvironmentError('DB connection already closed')
+            
         self.qurs = self.db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
         self.qurs1 = self.db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
         self.usl = {}
@@ -78,5 +80,5 @@ class SqlProvider(SqlBase):
         self.qurs.close()
         self.qurs1.close()
         self.db.commit()
-        self.db.close()
+        #self.db.close()
         

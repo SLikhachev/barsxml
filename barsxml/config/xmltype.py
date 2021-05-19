@@ -6,7 +6,8 @@ TYPES = dict(
     sto=5,
     pcr=7,
     ifa=8,
-    tra=9
+    tra=9,
+    xml=0
 )
 
 

@@ -68,7 +68,7 @@ class MakeTags:
                 #  ('usl', self.usl_tags, 'list')
                 return self.make_els(tag[0:2], self)  # return an [ET.Element]
             return [ self.make_el(tag, obj) ]
-        #simple tag
+        # simple tag
         # ignore tag
         if tag in self.ignore:
             return None

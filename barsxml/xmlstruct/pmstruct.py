@@ -6,6 +6,7 @@ from barsxml.xmlstruct.hdrstruct import HdrData
 
 def pmData(data):
     # here we set additional attrs
+    # type_pay
     # 1 - invoice
     # 2 - by soul
     if not data.get("type_pay", False):
@@ -14,59 +15,18 @@ def pmData(data):
 
 
 class PmUsl(RowObject):
-    """ -- data
-        usl.date_usl,
-        usl.code_usl, 
-        usl.kol_usl, 
-        usl.exec_spec as spec, 
-        usl.exec_doc as doc,
-        usl.exec_podr as podr,
-        tal.npr_mo,
-        tal.npr_spec,
-        tar.tarif as sumv_usl
-    """
 
-    def __init__(self, mo, tal, data):
+    def __init__(self, mo, data):
         super().__init__(data)
         self.mo = mo
-
-        # as for 495 paper disabled
-        '''
-        assert self.spec and self.podr, \
-            f'{tal.idcase}-Нет PODR (подразделиния), SPEC (специалиста) в ПМУ {self.code_usl}'
-        self.executor = self.fmt_000(
-            mo) + self.fmt_000(self.podr) + self.fmt_000(self.spec)
-        
-        if tal.naprlech:
-            assert self.npr_mo and self.npr_spec, \
-                f'{tal.idcase}-Нет NPR_MO (МО направления), NPR_SPEC (Специалиста направления)'
-            self.ex_spec = self.fmt_000(
-                self.npr_mo) + self.fmt_000(self.npr_spec)
-        '''
 
 
 # posechenue obraschenie
 class PmUsp(RowObject):
-    """ USP
-        tal.open_date as date_usl,
-        prof.one_visit as code_usl1,
-        prof.two_visit as code_usl2,
-        1 as kol_usl, 
-        prof.podr as podr, 
-        tal.doc_spec as spec,
-        tal.doc_code as doc,
-    """
 
-    def __init__(self, mo, data, ex_spec=None):
+    def __init__(self, mo, data):
         super().__init__(data)
         self.mo = mo
-
-        # as for 495 paper disabled
-        '''
-        self.executor = self.fmt_000(
-            mo) + self.fmt_000(self.podr) + self.fmt_000(self.spec)
-        self.ex_spec = ex_spec
-        '''
 
 
 class PmHdr(HdrData):
@@ -75,7 +35,6 @@ class PmHdr(HdrData):
         super().__init__(mo, year, month, typ, pack)
         self.filename = self.p_file
         self.filename1 = self.h_file
-        # print(self.endTag)
         self.zglv_tags = (
             'data',
             'filename',
@@ -144,13 +103,13 @@ class PmSluch(MakeTags):
 
         )
 
-    def set_usl(self, tag, tal, usl_list, usp):
+    def set_usl(self, tag, usl_list, usp):
 
         if not isinstance(usl_list, list):
             _u = [usl_list]
         else:
             _u = usl_list
-        u_list = [PmUsl(self.mo, tal, u) for u in _u]
+        u_list = [PmUsl(self.mo, u) for u in _u]
 
         # as for 495 paper disabled
         '''

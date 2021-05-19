@@ -1,4 +1,4 @@
-# import xml.etree.cElementTree as ET
+
 import re
 from functools import reduce
 
@@ -155,7 +155,7 @@ def _purp(id, d):
     '''
     # assert self.specfic, f'{id}-SPECFIC ( специальность из регионального справочника) не указан'
     if not d["purp"]:
-        d["purp"] = 2  # for usk_ok=2
+        d["purp"] = 2  # for usl_ok=2
     assert d[ "usl_ok"], f'{id}-USL_OK (условия оказания) не указан'
     assert d[ "for_pom"], f'{id}-FOR_POM (форма помощи) не указан'
     assert d[ "rslt"] and d["ishod"], f'{id}-RESULT/ISHOD (исход, результат) не указан'
@@ -194,7 +194,7 @@ def _naprav_cons(id, d):
     if ( int(d["prvs"]) in USL_PRVS) and int(d["for_pom"]) == 3:
     # other MO need napravlenie
         # ----------------------
-        # this code is a just durty hack
+        # this code is a just dirty hack
         # these records need to drop out 
         if d.get("from_firm", None) is None:
             d["from_firm"] = d["mo"]
