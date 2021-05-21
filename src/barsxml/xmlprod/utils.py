@@ -106,7 +106,8 @@ def _smo_polis(id, d):
         crd.smo_okato as smo_ok,
         crd.smo_name as smo_nam,
     '''
-    d["pr_nov"] = 1 if bool(d["mek"]) else 0
+    if not bool(d["pr_nov"]):
+        d["pr_nov"] = 1 if bool(d["mek"]) else 0
 
     # set smo, polis from talon
     if d.get("polis_type", None) is not None and \
@@ -135,7 +136,10 @@ def _smo_polis(id, d):
             f'{id}-Тип полис не ЕНП, не соответвует VPOLIS 3 (ЕНП)'
     else:
         raise AttributeError(f'{id}-Тип полиса не поддерживаем')
+
     assert d["smo"] or ["smo_ok"], f'{id}-Нет ни СМО ни СМО ОКАТО'
+    if not bool(d["smo"]):
+        d.pop("smo")
 
     try:
         d["id_pac"] = int(d["id_pac"])
