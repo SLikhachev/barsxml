@@ -190,8 +190,13 @@ def _naprav_cons(id, d):
         tal.nsndhosp,
         tal.d_type,
     '''
-# if set then return
-    if d["npr_mo"] and d["naprlech"]:
+    # consultaciya
+    if d["npr_mo"]:
+        if d.get("from_firm", None) is None:
+            d["from_firm"] = d["npr_mo"][-3:]
+        if d["from_firm"] != d["mo"]:
+            pass
+        #    assert d.get("naprlech", False), f'{id}-Консультация нет Напаравления в другое МО'
         if d.get("npr_date", None) is None:
             d["npr_date"] = d["date_1"]
         return
@@ -205,15 +210,13 @@ def _naprav_cons(id, d):
         if d.get("from_firm", None) is None:
             d["from_firm"] = d["mo"]
         #  ---------------------
+        d["npr_date"] = d.get("npr_date", d["date_1"])
         if d["from_firm"] != d["mo"]:
-            # 
-            assert False, f'{id}-Диагностика, нет Напаравления или МО направления'
+            d["npr_mo"] = f'{REGION}{d["from_firm"]}'
+            #assert d.get("naprlech", False), f'{id}-Диагностика, нет Напаравления или МО направления'
         else:
             # diagnostic in self MO no naprav needed
             d["npr_mo"] = f'{REGION}{d["mo"]}'
-            d["npr_date"] = d["date_1"]
-            d["from_firm"] = d["mo"]
-            d["naprlech"] = None
 
     # DS
     if d["usl_ok"] == 2:

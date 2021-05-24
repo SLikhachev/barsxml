@@ -463,7 +463,7 @@ class HmZap(MakeTags, KsgData):
 
     def set_usl(self, tag, usl_list, usp, data, stom=False):
         sum = 0.0
-        ed_col = 1
+        ed_col = 0
         if not isinstance(usl_list, list):
             _list = [usl_list]
         else:
@@ -484,8 +484,11 @@ class HmZap(MakeTags, KsgData):
             u_list.append(usl)
         
         if bool(usp):
-            u_list.append(HmUsp(self.mo, usp, data))
-        
+            # TODO if usp is tuple of several usp
+            _usp = HmUsp(self.mo, usp, data)
+            u_list.append(_usp)
+            ed_col += _usp.kol_usl
+
         setattr(self, tag, u_list)
 
         if self.tariff is not None:
