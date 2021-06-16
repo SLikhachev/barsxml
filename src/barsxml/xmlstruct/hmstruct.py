@@ -501,8 +501,9 @@ class HmZap(MakeTags, KsgData):
         #setattr(self, 'sum_m', summ)
         #setattr(self, 'sumv', summ)
 
+        # now ed_col will be present anyway
         self.ed_col = None
-        if not data["smo"]:
+        if True: # not data["smo"]:
             if data["idsp"] == 28:
                 self.ed_col = ed_col
             elif data["idsp"] == 29:
