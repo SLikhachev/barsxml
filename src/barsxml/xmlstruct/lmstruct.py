@@ -7,17 +7,17 @@ def lmData(data):
 
     def _pol(data):
         try:
-            return ('w', ['м', 'ж'].index(data["pol"].lower()) + 1)
+            return ('w', ['м', 'ж'].index(data.get("pol", '').lower()) + 1)
         except Exception as e:
-            raise e
+            return ('w', 0)
 
     def _dost(data):
         dost = []
-        if not bool(data["ot"]):
+        if not bool(data.get("ot", None)):
             dost.append(1)
-        if not bool(data["fam"]):
+        if not bool(data.get("fam", None)):
             dost.append(2)
-        if not (data["im"]):
+        if not (data.get("im", None)):
             dost.append(3)
         return ('dost', dost)
 
