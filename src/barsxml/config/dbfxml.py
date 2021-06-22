@@ -134,9 +134,10 @@ SELECT
     doctype,
     docser,
     docnum,
+    '' AS docdate,
+    '' AS docorg,
     snils AS prof_k,
-    
-    
+        
     okato_oms AS smo_ok,
     vnov_d AS mek,
     for_pom,

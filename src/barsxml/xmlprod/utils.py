@@ -123,10 +123,10 @@ def _smo_polis(id, d):
             d[ attr[0] ] = d[ attr[1] ]
 
 
-    assert d["vpolis"], f'{id}-Тип полиса не указан'
-    assert d["npolis"], f'{id}-Номер полиса не указан'
+    assert d.get("vpolis", None), f'{id}-Тип полиса не указан'
+    assert d.get("npolis", None), f'{id}-Номер полиса не указан'
     if d["vpolis"] == 1:
-        assert d["spolis"] and d["npolis"], \
+        assert d.get("spolis", None) and d["npolis"], \
             f'{id}-Тип полиса не соответвует типу 1 (старый)'
     elif d["vpolis"] == 2:
         assert len(d["npolis"]) == 9, \
@@ -296,7 +296,7 @@ def _pacient(id, d):
         assert d["doctype"] and d["docnum"] and d["docser"], \
             f'{id}-Тип полиса не ЕНП и неуказан полностью ДУЛ'
         if d["smo_ok"] != SMO_OK:
-            assert d["docdate"] and d["docorg"], f'{id}-Инокраевой без даты и УФМС паспорта'
+            assert d.get("docdate", None) and d.get("docorg", None), f'{id}-Инокраевой без даты и УФМС паспорта'
         if d["doctype"] and d["doctype"] == 14: # pass RF
             assert re.fullmatch('^\d\d \d\d$', d["docser"]), \
                 f'{id}-Серия паспрота не в формате 99 99: {d["docser"]}'
