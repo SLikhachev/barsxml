@@ -472,7 +472,7 @@ class HmZap(MakeTags, KsgData):
         for _usl in _list:
             usl = HmUsl(self.mo, _usl, data)
             sum += float(usl.sumv_usl)  #float( getattr(_usl, "sumv_usl", 0.0))
-            ed_col += usl.kol_usl
+            ed_col += 1 #usl.kol_usl # as for MEK only USL tag get in 
             """
             if stom:
                 setattr(usl, 'sumv_usl', '%.2f' %
@@ -487,7 +487,7 @@ class HmZap(MakeTags, KsgData):
             # TODO if usp is tuple of several usp
             _usp = HmUsp(self.mo, usp, data)
             u_list.append(_usp)
-            ed_col += _usp.kol_usl
+            ed_col += 1 #_usp.kol_usl
 
         setattr(self, tag, u_list)
 
