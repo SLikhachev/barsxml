@@ -10,7 +10,15 @@ from barsxml.xmlprod.utils import USL_PRVS
 class XmlRecords:
 
     def write_hdr(self, hdr, tmp_file, sd_z=0, summ='0.00'):
-        _hdr = hdr(self.mo_code, self.year, self.month, self.pack_digit, self.pack, sd_z, summ)
+        # mo_code: str(6), mo: str(3)
+        # year: str(4), month: str(2),
+        # pack_type_digit: int(0-9),
+        # pack_number: int(0-9),
+        # sd_z: int, sumv: str('0.00')):
+        #
+        _hdr = hdr(
+            self.mo_code, self.mo, self.year, self.month, self.pack_type_digit, self.pack_number, sd_z, summ)
+
         _fname = f"{_hdr.filename}.xml"
         _absname = f"{self.xmldir}\\{_fname}"
 
@@ -33,7 +41,7 @@ class XmlRecords:
         return _fname
 
     def write_sluch(self, stom=None):
-        # now DICT
+        # now data is DICT
         data = pmData(self.data)
 
         if data["prvs"] in USL_PRVS:

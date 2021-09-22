@@ -1,6 +1,7 @@
 
 SQL = "postgres"
 
+#127.0.0.1:7000/rpc/get_hpm_data?tbl=talonz_clin_21&mont=4&fresh=0
 GET_HPM_DATA = 'SELECT * FROM get_hpm_data(%s, %s, %s)'
 GET_ALL_LOCAL_MO = 'SELECT * FROM get_mo_local'
 GET_ALL_USL= 'SELECT * FROM get_pmu_usl(%s, %s, %s)'

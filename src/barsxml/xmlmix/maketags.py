@@ -18,9 +18,10 @@ class MakeTags:
             raise AttributeError("No such attribute: " + name)
     '''
     
-    def __init__(self, mo):
-        self.mo = mo
-        self.lpu= f"250{mo}"
+    def __init__(self, mo_code: str, mo: str):
+        self.mo_code = mo_code # string(6) digits
+        self.mo = mo # string(3) last 3 digits
+        self.lpu= mo_code
         self.next= 0
         self.ignore = tuple()
         self.required = tuple()

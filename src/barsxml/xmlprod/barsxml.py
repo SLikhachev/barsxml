@@ -8,7 +8,7 @@ from tempfile import TemporaryFile as tmpf
 #from functools import reduce
 from barsxml.config.xmltype import TYPES
 from barsxml.path.thispath import Path
-from barsxml.sql.sqlbase import get_sql_provider
+from barsxml.sql import get_sql_provider
 from barsxml.xmlprod.xmlrecords import XmlRecords
 from barsxml.xmlstruct.pmstruct import PmHdr, PmSluch
 from barsxml.xmlstruct.hmstruct import HmHdr, HmZap
@@ -18,7 +18,7 @@ from barsxml.xmlprod.utils import data_checker
 
 
 class BarsXml(XmlRecords):
-    def __init__(self, config: object, type: str, month: str, pack_num: str):
+    def __init__(self, config: object, pack_type: str, mo_code: str, month: str, pack_num: int):
         # type is:
         # app - app 0-1n
         # dsc - day stac 2n
@@ -30,35 +30,37 @@ class BarsXml(XmlRecords):
         # ifa  ifa 8n
         # tra - travma 9n
         # xml - for simple packages of diagnistic 0
-        self.pack_type = type  # = (pack_type, pack_digit)
-        self.pack_digit = TYPES[type]
-        self.mo_code = config.MO_CODE  # string(3) head MO code
+        self.pack_type = pack_type  # string(3)
+        self.pack_type_digit = TYPES[pack_type] % 10 # digit 0-9
+
+        # No chek for right code? may be exception
+        self.mo_code = mo_code # string MO in 250796 format
+        self.mo = mo_code[3:] # last 3 digits i.e 796
+
         self.xmldir = Path( str(config.BASE_XML_DIR) )
-        if len(type) > 0:
-            self.xmldir = self.xmldir / type   # str abs path to save xml file
-        self.error_file_name = self.xmldir / f"errors_{type}{str(time())[10:14]}.txt"
+        if len(pack_type) > 0:
+            self.xmldir = self.xmldir / pack_type   # str abs path to save xml file
+
+        self.error_file_name = self.xmldir / f"errors_{pack_type}{str(time())[10:14]}.txt"
         self.errorFile = None
-        #self._xpcr = config.PCR
-        #self._xifa = config.IFA
+        self.errors = 0
 
         self.year = config.YEAR  # string(4) digits
         self.month = month  # string(2) digits
-        self.pack = pack_num  # string(2), pack number
-        self.ye_ar = self.year[2:]  # last 2 digits
+        self.pack_number = int(pack_num) % 10 # digit 0-9
 
-        self.errors = 0
         self.zfile = ''
 
-        # init sql adapter
-        self.sql = get_sql_provider(config).SqlProvider(config, self.year, month)
+        # init sql adapter dependency
+        self.sql = get_sql_provider(config).SqlProvider(config, mo_code, self.year, month)
 
         # init xml objects
 
     def init_files(self):
 
-        self.pmSluch = PmSluch(self.mo_code)
-        self.hmZap = HmZap(self.mo_code)
-        self.lmPers = LmPers(self.mo_code)
+        self.pmSluch = PmSluch(self.mo_code, self.mo)
+        self.hmZap = HmZap(self.mo_code, self.mo)
+        self.lmPers = LmPers(self.mo_code, self.mo)
 
         self.errorFile = open(self.error_file_name, "w")
 
@@ -75,33 +77,33 @@ class BarsXml(XmlRecords):
         """
         self.check = check
         rc = 0
-        rdata = self.sql.get_hpm_data(self.pack_type, get_fresh)
-
+        '''
         if len(rdata) == 0:
             return self.close(rc)
             #raise Exception("Length of the fetched sql data is zero ")
-
+        '''
         self.init_files()
         self.sql.get_all_usp()
         self.sql.get_all_usl()
-        
-        # rc = reduce(self.process(mark_sent), rdata, 0)
-        # instead reduce make straight loop (better performance)
+        rdata = self.sql.get_hpm_data(self.pack_type, get_fresh)
+
         for rdata_row in rdata:
-            self.ksg = self.sql.get_ksg_data(rdata_row)  # dict
-            nmo = self.sql.get_npr_mo(rdata_row)
-            self.usl = self.sql.get_pmu_usl(rdata_row.idcase)
+            data = self.sql.rec_to_dict(rdata_row)
+            idcase, card = data['idcase'], data['card']
+            self.ksg = self.sql.get_ksg_data(data)  # dict
+            nmo = self.sql.get_npr_mo(data) #int
+            self.usl = self.sql.get_pmu_usl(idcase)
             # specaial usl for posesh / obrasch
-            self.usp = self.sql.get_spec_usl(rdata_row)
+            self.usp = self.sql.get_spec_usl(data)
             try:
-                self.data = data_checker(rdata_row, self.mo_code, nmo)
+                self.data = data_checker(data, int(self.mo), nmo)
                 self.write_sluch()
                 self.write_zap()
                 self.write_pers()
             except Exception as e:
-                self.errorFile.write(f'{rdata_row.idcase}-{e}\n')
+                self.errorFile.write(f'{idcase}-{e}\n')
                 # errors from original rdata_row
-                self.sql.set_error(rdata_row.idcase, rdata_row.card, str(e).split('-')[1])
+                self.sql.set_error(idcase, card, str(e).split('-')[1])
                 self.errors += 1
                 continue
 
@@ -117,36 +119,6 @@ class BarsXml(XmlRecords):
 
         return self.close(rc)
 
-    def process(self, mark_sent):
-        def fp(rc, rdata_row):
-            #if not self.proper_type(rdata_row):
-            #    return rc
-
-            self.ksg = self.sql.get_ksg_data(rdata_row)  # dict
-            nmo = self.sql.get_npr_mo(rdata_row)
-            self.usl = self.sql._get_usl(rdata_row.idcase)
-            # specaial usl for posesh obrasch
-            self.usp = self.sql.get_spec_usl(rdata_row)
-            try:
-                self.data = data_checker(rdata_row, self.mo_code, nmo)
-                self.write_sluch()
-                self.write_zap()
-                self.write_pers()
-            except Exception as e:
-                self.errorFile.write(f'{rdata_row.idcase}-{e}\n')
-                # errors from original rdata_row
-                self.sql.set_error(rdata_row.idcase, rdata_row.card, str(e).split('-')[1])
-                self.errors += 1
-                return rc
-
-            # mark as sent
-            if not self.check and mark_sent:
-                self.sql.mark_as_sent(rdata_row)
-            rc += 1
-            return rc
-
-        return fp
-
     def make_zip(self, rc):
         # make zip file anyway and return it
         to_zip = []
@@ -155,7 +127,8 @@ class BarsXml(XmlRecords):
             to_zip.append(self.write_hdr(h, f, sd_z=rc, summ='0.00'))
             f.close()
 
-        hdr = HdrData(self.mo_code, self.year, self.month, self.pack_digit, self.pack)
+        hdr = HdrData(
+            self.mo_code, self.mo, self.year, self.month, self.pack_type_digit, self.pack_number)
         os.chdir(str(self.xmldir))
         self.zfile = f'{hdr.pack_name}'
         with zipfile.ZipFile(self.zfile, 'w', compression=zipfile.ZIP_DEFLATED) as zipH:

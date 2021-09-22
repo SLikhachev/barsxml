@@ -1,17 +1,14 @@
 
 from barsxml.path.thispath import Path
-from barsxml.config.postgresxml import *
+from barsxml.config.pgrestxml import *
 
-SQL_SRV = dict(
-    dbname = 'hokuto',
-    user = 'postgres',
-    password = 'boruh'
-)
+SQL_SRV = {'srv': 'http://localhost:7000'}
 
 tests_dir = Path.script_dir()
 MO_CODE = "250796"
 YEAR="2021"
-BASE_XML_DIR = tests_dir / 'data' / 'hokuto' 
+BASE_XML_DIR = tests_dir / 'data' / 'hokuto'
+
 
 DS = dict(
     p_per = 1,

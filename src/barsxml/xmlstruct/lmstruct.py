@@ -43,9 +43,15 @@ def lmData(data):
 
 
 class LmHdr(HdrData):
-
-    def __init__(self, mo, year, month, typ, pack, sd_z=None, summ=None):
-        super().__init__(mo, year, month, typ, pack)
+    # mo_code: str(6), mo: str(3)
+    # year: str(4), month: str(2),
+    # pack_type_digit: int(0-9),
+    # pack_number: int(0-9),
+    # sd_z: int, sumv float
+    #
+    def __init__(self, mo_code: str, mo: str, year: str, month: str,
+                 pack_type_digit: int, pack_number: int, sd_z=None, summ=None):
+        super().__init__(mo_code, mo, year, month, pack_type_digit, pack_number)
         self.startTag = '%s\n<PERS_LIST>' % self.xmlVer
         self.endTag = '</PERS_LIST>'
         self.filename = self.l_file
@@ -66,8 +72,8 @@ class LmHdr(HdrData):
 
 class LmPers(MakeTags):
 
-    def __init__(self, mo):
-        super().__init__(mo)
+    def __init__(self, mo_code: str, mo: str):
+        super().__init__(mo_code, mo)
         self.dubl = []
         self.uniq = set()
         self.pers_tags = (

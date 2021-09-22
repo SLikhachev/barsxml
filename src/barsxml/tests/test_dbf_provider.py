@@ -1,6 +1,6 @@
 
 
-from barsxml.sql.sqlbase import get_sql_provider
+from barsxml.sql import get_sql_provider
 from barsxml.tests import xml_dbf_config as config
 
 

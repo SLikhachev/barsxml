@@ -7,9 +7,9 @@ from barsxml.sql.sqlbase import SqlBase
 # DBF Sql PROVIDER
 class SqlProvider(SqlBase):
     
-    def __init__(self, config, year, month):
-        super().__init__(config, year, month)
-        self.mo = self.config.MO_CODE
+    def __init__(self, config, mo_code, year, month):
+        super().__init__(config, mo_code, year, month)
+        self.mo = mo_code[:3]
         self.dbfn = f'{self.mo}{self.ye_ar[1]}{self.month}'
         self.dbf_connect()
         self.usl = {}

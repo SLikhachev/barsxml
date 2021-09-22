@@ -16,7 +16,7 @@ def pmData(data):
 
 class PmUsl(RowObject):
 
-    def __init__(self, mo, data):
+    def __init__(self, mo: str, data: object):
         super().__init__(data)
         self.mo = mo
 
@@ -24,15 +24,20 @@ class PmUsl(RowObject):
 # posechenue obraschenie
 class PmUsp(RowObject):
 
-    def __init__(self, mo, data):
+    def __init__(self, mo: str, data: object):
         super().__init__(data)
         self.mo = mo
 
 
 class PmHdr(HdrData):
-
-    def __init__(self, mo, year, month, typ, pack, sd_z=None, summ=None):
-        super().__init__(mo, year, month, typ, pack)
+    # mo_code: str(6), mo: str(3)
+    # year: str(4), month: str(2),
+    # pack_type_digit: int(0-9),
+    # pack_number: int(0-9),
+    # sd_z: int, sumv float
+    def __init__(self, mo_code: str, mo: str,  year: str, month: str,
+                 pack_type_digit: int, pack_number: int, sd_z=None, summ=None):
+        super().__init__(mo_code, mo, year, month, pack_type_digit, pack_number)
         self.filename = self.p_file
         self.filename1 = self.h_file
         self.zglv_tags = (
@@ -52,8 +57,8 @@ class PmHdr(HdrData):
 
 class PmSluch(MakeTags):
 
-    def __init__(self, mo):
-        super().__init__(mo)
+    def __init__(self, mo_code: str, mo: str):
+        super().__init__(mo_code, mo)
         self.usl = None
         self.stom = None
         self.sl_id = 1

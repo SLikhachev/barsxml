@@ -8,7 +8,7 @@ from barsxml.xmlprod.utils import USL_PURP, USL_PRVS, \
 
 
 def hmData(data):
-    # data: tuple like object
+    # data: dict
     # ksg: dict or None
 
     def _os_sluch(data):
@@ -121,9 +121,9 @@ def hmData(data):
 
 class HmUsl(RowObject):
 
-    def __init__(self, mo, usl_data, data):
+    def __init__(self, mo_code: str, usl_data: object, data: dict):
         super().__init__(usl_data)
-        self.lpu = f'{REGION}{mo}'
+        self.lpu = mo_code
         self.profil = getattr(self, 'profil', data["profil"])
         self.det = data.get("det", 0)
 
@@ -154,8 +154,8 @@ class HmUsp(HmUsl):
         tal.doc_code as doc,
     """
 
-    def __init__(self, mo, usp_data, data):
-        super().__init__(mo, usp_data, data)
+    def __init__(self, mo_code: str, usp_data: object, data: dict):
+        super().__init__(mo_code, usp_data, data)
         if data["idsp"] in (28, 29):
             self.code_usl = getattr(self, "code_usl1", None)
         else:
@@ -164,10 +164,15 @@ class HmUsp(HmUsl):
 
 
 class HmHdr(HdrData):
-
-    def __init__(self, mo: str, year: str, month:str, typ: int,  pack: str, sd_z: int, sumv: float):
-        super().__init__(mo, year, month, typ, pack)
-        self.sd_z = '%s' % sd_z
+    # mo_code: str(6), mo: str(3)
+    # year: str(4), month: str(2),
+    # pack_type_digit: int(0-9),
+    # pack_number: int(0-9),
+    # sd_z: int, sumv float
+    def __init__(self, mo_code:str, mo: str, year: str, month: str,
+                 pack_type_digit: int,  pack_number: int, sd_z: int, sumv: float):
+        super().__init__(mo_code, mo, year, month, pack_type_digit, pack_number)
+        self.sd_z = str(sd_z)
         self.code = '%s%s%s' % (mo, self.year[2:], self.pack_month)
         self.nschet = f'{self.code}{self.pack_num}'
         self.dschet = self.data
@@ -242,8 +247,8 @@ class HmZap(MakeTags, KsgData):
 
     # this calcs ourself
 
-    def __init__(self, mo):
-        super().__init__(mo)
+    def __init__(self, mo_code: str, mo: str):
+        super().__init__(mo_code, mo)
         self.usl = None
         self.stom = None
         self.ksg_kpg = None
@@ -470,7 +475,7 @@ class HmZap(MakeTags, KsgData):
             _list = usl_list
         u_list = []
         for _usl in _list:
-            usl = HmUsl(self.mo, _usl, data)
+            usl = HmUsl(self.mo_code, _usl, data)
             sum += float(usl.sumv_usl)  #float( getattr(_usl, "sumv_usl", 0.0))
             ed_col += usl.kol_usl # this is right calculation 
             """
@@ -485,7 +490,7 @@ class HmZap(MakeTags, KsgData):
         
         if bool(usp):
             # TODO if usp is tuple of several usp
-            _usp = HmUsp(self.mo, usp, data)
+            _usp = HmUsp(self.mo_code, usp, data)
             u_list.append(_usp)
             ed_col += _usp.kol_usl
 

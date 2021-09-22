@@ -1,4 +1,5 @@
 
+from types import SimpleNamespace
 import re
 from functools import reduce
 
@@ -29,18 +30,25 @@ ED_COL_IDSP = (25, 28, 29)
 REGION = '250'
 SMO_OK = "05000"
 
-class RowObject:
-    def __init__(self, row):
+class RowObject(SimpleNamespace):
 
-        if hasattr(row, 'cursor_description'):
+    def __init__(self, row):
+        if isinstance(row, dict):
+            self.from_dict(row)
+        elif hasattr(row, 'cursor_description'):
             self.odbc_row_data(row)
-        else:
+        elif hasattr(row, '_asdict'):
             self.psycopg_row_data(row)
+        else:
+            raise TypeError(f'Row Object has non supported type: {type(row)}')
+
+    def from_dict(self, data):
+        for name, value in data.items():
+            setattr(self, name, value)
 
     def psycopg_row_data(self, data):
-        if hasattr(data, "_asdict"):
-            for name, value in data._asdict().items():
-                setattr(self, name, value)
+         for name, value in data._asdict().items():
+             setattr(self, name, value)
 
     def odbc_row_data(self, data):
         def attrs(idx, desc):
@@ -312,35 +320,16 @@ def _d_type(id, d):
     d["d_type"] = None 
     if d.get("ot", None) is None:
         d["d_type"] = 5 
-    
-
-def rec_to_dict(rec):
-    if hasattr(rec, "_asdict"):
-        return rec._asdict()
-    if hasattr(rec, "cursor_description"):
-        drec= {}
-        for idx, desc in enumerate(rec.cursor_description):
-            d = rec[idx]
-            if isinstance(d, float):
-                d = int(d)
-            drec[ desc[0] ] = d
-        return drec
-    raise AttributeError( "Can't transform Record to Dict" )
 
 
-def data_checker(rec, mo_code, napr_mo):
-    d= rec_to_dict(rec)
+def data_checker(d: dict, mo: int, napr_mo: int) -> dict:
 
-    d["mo"] = mo_code # str(3) 228
+    d["mo"] = mo # int(3) 228
     # in rec we have only from_firm
-    d["npr_mo"] = napr_mo  # str(6) 250228 or None
+    d["npr_mo"] = napr_mo  # int(6) 250228 or None
     if d.get("mo_att", None) is None:
-        d["mo_att"] = mo_code 
-    """
-    if d.get("from_firm", None) is None:
-        d["from_firm"] = mo_code
-    """
-    
+        d["mo_att"] = mo
+
     fns = (
         _date,
         _smo_polis,
