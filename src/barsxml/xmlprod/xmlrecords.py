@@ -9,7 +9,37 @@ from barsxml.xmlprod.utils import USL_PRVS
 
 class XmlRecords:
 
-    def write_hdr(self, hdr, tmp_file, sd_z=0, summ='0.00'):
+    def write_hdr(self, tmpd, hdr, tmp_file, sd_z=0, summ='0.00'):
+        # mo_code: str(6), mo: str(3)
+        # year: str(4), month: str(2),
+        # pack_type_digit: int(0-9),
+        # pack_number: int(0-9),
+        # sd_z: int, sumv: str('0.00')):
+        #
+        _hdr = hdr(
+            self.mo_code, self.mo, self.year, self.month, self.pack_type_digit, self.pack_number, sd_z, summ)
+
+        _fname = f"{_hdr.filename}.xml"
+        _absname = f"{tmpd}\\{_fname}"
+
+        with open(_absname, 'w', encoding='1251') as _file:
+            _file.write('%s\n' % _hdr.startTag)
+
+            ET.ElementTree(_hdr.get_zag(_hdr)).write(_file, encoding="unicode")
+            _file.write('\n')
+            schet = _hdr.get_schet(_hdr)  # LM class returns None
+
+            if schet is not None:
+                ET.ElementTree(schet).write(_file, encoding="unicode")
+                _file.write('\n')
+
+            for line in tmp_file:
+                _file.write(line)
+
+            _file.write(_hdr.endTag)
+
+
+    def _write_hdr(self, hdr, tmp_file, sd_z=0, summ='0.00'):
         # mo_code: str(6), mo: str(3)
         # year: str(4), month: str(2),
         # pack_type_digit: int(0-9),

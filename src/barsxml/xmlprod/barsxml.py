@@ -1,8 +1,9 @@
 
 
-import os, zipfile
+import os, shutil, zipfile
 from time import time
-from tempfile import TemporaryFile as tmpf
+from tempfile import SpooledTemporaryFile as tmpf
+from tempfile import TemporaryDirectory
 # NO reason
 #from concurrent.futures import ThreadPoolExecutor, as_completed
 #from functools import reduce
@@ -120,6 +121,21 @@ class BarsXml(XmlRecords):
         return self.close(rc)
 
     def make_zip(self, rc):
+        # make zip file anyway and return it
+        with TemporaryDirectory() as tmpd:
+
+            for f, h in ((self.hmFile, HmHdr), (self.pmFile, PmHdr), (self.lmFile, LmHdr)):
+                f.seek(0)
+                self.write_hdr(tmpd, h, f, sd_z=rc, summ='0.00')
+                f.close()
+
+            hdr = HdrData(
+                self.mo_code, self.mo, self.year, self.month, self.pack_type_digit, self.pack_number)
+            self.zfile = hdr.pack_name.split('.')[0]
+            os.chdir(str(self.xmldir))
+            shutil.make_archive(self.zfile, 'zip', tmpd)
+
+    def _make_zip(self, rc):
         # make zip file anyway and return it
         to_zip = []
         for f, h in ((self.hmFile, HmHdr), (self.pmFile, PmHdr), (self.lmFile, LmHdr)):

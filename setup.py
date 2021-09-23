@@ -4,7 +4,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(name='barsxml',
-    version='0.1.18',
+    version='0.1.19',
     url='https://github.com/SLikhachev/barsxml',
     author='SLikhachev',
     author_email='polaughing@yahoo.com',
