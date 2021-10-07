@@ -1,6 +1,6 @@
 
 
-import os, zipfile
+import os, shutil, zipfile
 from time import time
 from tempfile import SpooledTemporaryFile as tmpf
 #from tempfile import TemporaryFile as tmpf
@@ -136,18 +136,18 @@ class BarsXml(XmlRecords):
             hdr = HdrData(
                 self.mo_code, self.mo, self.year, self.month,
                 self.pack_type_digit, self.pack_number)
-            #self.zfile = hdr.pack_name.split('.')[0]
-            self.zfile = f'{hdr.pack_name}'
-            self.pzfile = Path(self.xmldir)  /  self.zfile
-            #os.chdir(str(self.xmldir))
-            os.chdir(tmpd)
-            with zipfile.ZipFile(self.pzfile, 'w', compression=zipfile.ZIP_DEFLATED) as zipH:
-                for f in to_zip:
-                    zipH.write(f)
+            self.zfile = hdr.pack_name.split('.')[0]
+            #self.zfile = f'{hdr.pack_name}'
+            #self.pzfile = Path(self.xmldir)  /  self.zfile
+            os.chdir(str(self.xmldir))
+            #os.chdir(tmpd)
+            #with zipfile.ZipFile(self.pzfile, 'w', compression=zipfile.ZIP_DEFLATED) as zipH:
+            #    for f in to_zip:
+            #       zipH.write(f)
 
-            #base_name = Path(self.xmldir)  /  self.zfile
-            #print(self.xmldir, tmpd, base_name)
-            #shutil.make_archive(str(base_name), 'zip')
+            base_name = Path(self.xmldir)  /  self.zfile
+            print(self.xmldir, tmpd, base_name)
+            shutil.make_archive(str(base_name), 'zip', tmpd)
 
     def close(self, rc):
         if bool(self.errorFile):
