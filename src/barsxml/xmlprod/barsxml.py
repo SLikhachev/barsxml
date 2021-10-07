@@ -1,8 +1,9 @@
 
 
-import os, shutil, zipfile
+import os, zipfile
 from time import time
 from tempfile import SpooledTemporaryFile as tmpf
+#from tempfile import TemporaryFile as tmpf
 from tempfile import TemporaryDirectory
 # NO reason
 #from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -91,13 +92,16 @@ class BarsXml(XmlRecords):
         for rdata_row in rdata:
             data = self.sql.rec_to_dict(rdata_row)
             idcase, card = data['idcase'], data['card']
+
             self.ksg = self.sql.get_ksg_data(data)  # dict
             nmo = self.sql.get_npr_mo(data) #int
+
             self.usl = self.sql.get_pmu_usl(idcase)
             # specaial usl for posesh / obrasch
             self.usp = self.sql.get_spec_usl(data)
             try:
                 self.data = data_checker(data, int(self.mo), nmo)
+                #print(self.data)
                 self.write_sluch()
                 self.write_zap()
                 self.write_pers()
@@ -123,33 +127,27 @@ class BarsXml(XmlRecords):
     def make_zip(self, rc):
         # make zip file anyway and return it
         with TemporaryDirectory() as tmpd:
-
-            for f, h in ((self.hmFile, HmHdr), (self.pmFile, PmHdr), (self.lmFile, LmHdr)):
-                f.seek(0)
-                self.write_hdr(tmpd, h, f, sd_z=rc, summ='0.00')
-                f.close()
+            to_zip = []
+            for fd, hdr in ((self.hmFile, HmHdr), (self.pmFile, PmHdr), (self.lmFile, LmHdr)):
+                fd.seek(0)
+                to_zip.append(self.write_hdr(tmpd, hdr, fd, sd_z=rc, summ='0.00'))
+                fd.close()
 
             hdr = HdrData(
-                self.mo_code, self.mo, self.year, self.month, self.pack_type_digit, self.pack_number)
-            self.zfile = hdr.pack_name.split('.')[0]
-            os.chdir(str(self.xmldir))
-            shutil.make_archive(self.zfile, 'zip', tmpd)
+                self.mo_code, self.mo, self.year, self.month,
+                self.pack_type_digit, self.pack_number)
+            #self.zfile = hdr.pack_name.split('.')[0]
+            self.zfile = f'{hdr.pack_name}'
+            self.pzfile = Path(self.xmldir)  /  self.zfile
+            #os.chdir(str(self.xmldir))
+            os.chdir(tmpd)
+            with zipfile.ZipFile(self.pzfile, 'w', compression=zipfile.ZIP_DEFLATED) as zipH:
+                for f in to_zip:
+                    zipH.write(f)
 
-    def _make_zip(self, rc):
-        # make zip file anyway and return it
-        to_zip = []
-        for f, h in ((self.hmFile, HmHdr), (self.pmFile, PmHdr), (self.lmFile, LmHdr)):
-            f.seek(0)
-            to_zip.append(self.write_hdr(h, f, sd_z=rc, summ='0.00'))
-            f.close()
-
-        hdr = HdrData(
-            self.mo_code, self.mo, self.year, self.month, self.pack_type_digit, self.pack_number)
-        os.chdir(str(self.xmldir))
-        self.zfile = f'{hdr.pack_name}'
-        with zipfile.ZipFile(self.zfile, 'w', compression=zipfile.ZIP_DEFLATED) as zipH:
-            for f in to_zip:
-                zipH.write(f)
+            #base_name = Path(self.xmldir)  /  self.zfile
+            #print(self.xmldir, tmpd, base_name)
+            #shutil.make_archive(str(base_name), 'zip')
 
     def close(self, rc):
         if bool(self.errorFile):
@@ -168,7 +166,7 @@ class BarsXml(XmlRecords):
         self.sql.close()
 
         zipname = self.error_file_name
-        if len(self.zfile) > 0:
+        if len(str(self.zfile)) > 0:
             zipname = self.xmldir / self.zfile
 
         pers = self.lmPers.uniq if hasattr(self, 'lmPers') else ()

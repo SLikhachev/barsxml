@@ -12,7 +12,7 @@ class SqlProvider(SqlBase):
         try:
             self.db = psycopg2.connect(
                 port=dbc.get('port', 5432),
-                host=dbc.get('host', 'localhost'),
+                host=dbc.get('host', ''),
                 dbname=dbc['dbname'],
                 user=dbc['user'],
                 password=dbc['password']
