@@ -29,7 +29,7 @@ class SqlProvider(SqlBase):
         self.spec_usl = {}
         self.mo_local={}
         self.get_local_mo()
-        #self.truncate_errors()
+        self.truncate_errors()
         self.talon_tbl = f'talonz_clin_{self.ye_ar}'
         self.para_tbl = f'para_clin_{self.ye_ar}'
         

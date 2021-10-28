@@ -167,7 +167,7 @@ class BarsXml(XmlRecords):
 
         zipname = self.error_file_name
         if len(str(self.zfile)) > 0:
-            zipname = self.xmldir / self.zfile
+            zipname = self.xmldir / f'{self.zfile}.zip'
 
         pers = self.lmPers.uniq if hasattr(self, 'lmPers') else ()
         # rows wrote, person wrote, zipfile name, errors found
