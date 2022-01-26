@@ -52,7 +52,7 @@ class LmHdr(HdrData):
     def __init__(self, mo_code: str, mo: str, year: str, month: str,
                  pack_type_digit: int, pack_number: int, sd_z=None, summ=None):
         super().__init__(mo_code, mo, year, month, pack_type_digit, pack_number)
-        self.startTag = '%s\n<PERS_LIST>' % self.xmlVer
+        self.startTag = f'{self.xmlTag}\n<PERS_LIST>'
         self.endTag = '</PERS_LIST>'
         self.filename = self.l_file
         self.filename1 = self.h_file

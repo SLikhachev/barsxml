@@ -6,8 +6,8 @@ from barsxml.xmlprod.barsxml import BarsXml
 
 def test_app():
     time1 = datetime.now()
-    config =  importlib.import_module(f'barsxml.tests.xml_pg_config')
-    xml = BarsXml(config, 'app', '250796', '04', 1)
+    config =  importlib.import_module('barsxml.tests.xml_pg_config')
+    xml = BarsXml(config, 'app', '250796', '11', 1)
     rc, pc, zname, errors = xml.make_xml(False, False, False)
     log = f"APP rc={rc}  pc={pc}  zname={zname}, errors={errors}"
     print(log)

@@ -1,4 +1,5 @@
 
+# day stac
 DS = dict(
     p_per = 1,
     podr = 971,

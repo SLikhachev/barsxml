@@ -3,7 +3,7 @@ from barsxml.path.thispath import Path
 from barsxml.config.postgresxml import *
 
 SQL_SRV = dict(
-    host='',
+    host='192.168.1.31',
     dbname = 'hokuto',
     user = 'postgres',
     password = 'boruh'

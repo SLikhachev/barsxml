@@ -1,4 +1,6 @@
 __pycache__/
+.pytest_cashe/
+.vscode/
 barsxml.egg-info/
 build/
 dist/

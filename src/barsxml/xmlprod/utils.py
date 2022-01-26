@@ -126,7 +126,7 @@ def _smo_polis(id, d):
                 ("npolis", "polis_num"),
                 ("spolis", "polis_ser"),
                 ("smo", "tal_smo"),
-                ("smo_ok" , "smo_okato"),
+                #("smo_ok" , "smo_okato"),
                 ("id_pac", "polis_num")):
             d[ attr[0] ] = d[ attr[1] ]
 
@@ -142,14 +142,21 @@ def _smo_polis(id, d):
     elif d["vpolis"] == 3:
         assert len(d["npolis"]) == 16, \
             f'{id}-Тип полис не ЕНП, не соответвует VPOLIS 3 (ЕНП)'
+## -------------------------------------
+        # as for H VERSION = 3.2 ENP tag
+        d["enp"] = d["npolis"]
+        del d["npolis"]
+## -------------------------------------
     else:
         raise AttributeError(f'{id}-Тип полиса не поддерживаем')
 
-    assert d.get("smo", None) or d.get("smo_ok", None), f'{id}-Нет ни СМО ни СМО ОКАТО'
-
+    # smo is logical False (empty string or zero value)
     smo = d.get("smo", None)
     if smo is not None and not bool(smo):
         d["smo"] = None
+
+    # as for H VERSION = 3.2 SMO_OK tag was deleted
+    assert d.get("smo", None) or d.get("smo_ogrn", None), f'{id}-Нет ни СМО ни СМО ОГРН'
 
     try:
         d["id_pac"] = int(d["id_pac"])
@@ -192,7 +199,7 @@ def _visits(id, d):
 # приняли на консультацию
 def _naprav_cons(id, d):
     '''
-        tal.npr_date 
+        tal.npr_date
         tal.npr_mo as from_firm,
         tal.naprlech,
         tal.nsndhosp,
@@ -208,13 +215,13 @@ def _naprav_cons(id, d):
         if d.get("npr_date", None) is None:
             d["npr_date"] = d["date_1"]
         return
-    
+
     # diagnostic planovaya
     if ( int(d["prvs"]) in USL_PRVS) and int(d["for_pom"]) == 3:
     # other MO need napravlenie
         # ----------------------
         # this code is a just dirty hack
-        # these records need to drop out 
+        # these records need to drop out
         if d.get("from_firm", None) is None:
             d["from_firm"] = d["mo"]
         #  ---------------------
@@ -232,7 +239,7 @@ def _naprav_cons(id, d):
         d["npr_mo"] = f'{REGION}{d["mo"]}'
         d["npr_date"] = d["date_1"]
         d["from_firm"] = d["mo"]
-    
+
 def _naprav_hosp(id, d):
     # hospital from self MO
     if d.get("nsndhosp", None) is not None:
@@ -317,18 +324,17 @@ def _pacient(id, d):
     # self.os_sluch= 2 if self.dost.find('1') > 0 else None
 
 def _d_type(id, d):
-    d["d_type"] = None 
+    d["d_type"] = None
     if d.get("ot", None) is None:
-        d["d_type"] = 5 
+        d["d_type"] = 5
 
+def data_checker(data: dict, mo: int, napr_mo: int):# -> dict:
 
-def data_checker(d: dict, mo: int, napr_mo: int) -> dict:
-
-    d["mo"] = mo # int(3) 228
+    data["mo"] = mo # int(3) 228
     # in rec we have only from_firm
-    d["npr_mo"] = napr_mo  # int(6) 250228 or None
-    if d.get("mo_att", None) is None:
-        d["mo_att"] = mo
+    data["npr_mo"] = napr_mo  # int(6) 250228 or None
+    if data.get("mo_att", None) is None:
+        data["mo_att"] = mo
 
     fns = (
         _date,
@@ -340,9 +346,8 @@ def data_checker(d: dict, mo: int, napr_mo: int) -> dict:
         _diag,
         _doct,
         _pacient,
-        _d_type
+        _d_type,
     )
     for func in fns:
-        func(d["idcase"], d)
-    return d
+        func(data["idcase"], data)
 

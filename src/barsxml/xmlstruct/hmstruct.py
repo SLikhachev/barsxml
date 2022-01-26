@@ -4,7 +4,7 @@ from barsxml.xmlprod.utils import _iddokt, RowObject
 from barsxml.xmlmix.maketags import MakeTags
 from barsxml.xmlstruct.hdrstruct import HdrData
 from barsxml.xmlprod.utils import USL_PURP, USL_PRVS, \
-    PROFOSM_PURP, SESTRY_PROF, STOM_PROF, REGION, ED_COL_IDSP
+    PROFOSM_PURP, SESTRY_PROF, STOM_PROF, SMO_OK, ED_COL_IDSP
 
 
 def hmData(data):
@@ -60,14 +60,19 @@ def hmData(data):
         def pcel(for_pom, purp):
             if for_pom == 2:
                 return '1.1'  # Посещениe в неотложной форме
-            if purp == 7:  # Патронаж
-                return '2.5'
-            if purp in (1, 2, 6, 9):  # Aктивное посещение
+            if purp in (1, 2, 6, 9):  # лечебная цель  
+                # SMO другой субъект
+                if data["smo_ok"] != SMO_OK: 
+                    if data["visit_pol"] + data["visit_hom"] == 1:
+                        return '1.0' # posesh
+                    return '3.0' # obrash
                 return '1.2'
             if purp in (3, 10,):  # Диспансерное наблюдение
                 return '1.3'
             if purp in (4, 5, 14, 20, 21):  # Медицинский осмотр
                 return '2.1'
+            if purp == 7:  # Патронаж
+                return '2.5'
             return '2.6'  # Посещение по другим обстоятельствам
 
         return ('p_cel',
@@ -118,6 +123,12 @@ def hmData(data):
 
     return data
 
+class MrUsl:
+    
+    def __init__(self, prvs, code_md):
+        self.prvs=prvs
+        self.code_md=code_md 
+
 
 class HmUsl(RowObject):
 
@@ -133,14 +144,16 @@ class HmUsl(RowObject):
         self.date_in = _date1
         self.date_out = getattr(self, 'date_out', data['date_2'])
         self.ds = data["ds1"]
-        self.prvs = getattr(self, 'prvs', data["prvs"])
+        self.sumv_usl = getattr(self, 'sumv_usl', 0)
+        
+        prvs = getattr(self, 'prvs', data["prvs"])
         
         # check code_md format
-        self.code_md = _iddokt(
+        code_md = _iddokt(
             data["idcase"],
             getattr(self, 'code_md', data["iddokt"])
         )
-        self.sumv_usl = getattr(self, 'sumv_usl', 0)
+        self.mr_usl_n=[MrUsl(prvs, code_md)]
 
 
 class HmUsp(HmUsl):
@@ -270,8 +283,9 @@ class HmZap(MakeTags, KsgData):
             'npolis',  # crd.polis_num || tal.polis_num
             'st_okato',  # crd.st_okato
             'smo',  # crd.smo || tal.smo
-            'smo_ogrn',  # crd.smo_ogrn
-            'smo_ok',  # crd.smo_okato || tal.smo_okato
+            #'smo_ogrn',  # crd.smo_ogrn
+            #'smo_ok',  # crd.smo_okato || tal.smo_okato
+            'enp', #crd.enp || tal.enp
             'smo_nam',  # crd.smo_name
             'inv',  # ignore
             'mse',  # ignore
@@ -300,6 +314,13 @@ class HmZap(MakeTags, KsgData):
             'it_sl',
             ('sl_koef', self.sl_koef_tags, 'sl_koef'),
         )
+        
+        self.mr_usl_n = (
+            'mr_n',
+            'prvs',
+            'code_md'
+        )
+        
         self.usl_tags = (
             'idserv',
             'lpu',  # self.lpu
@@ -315,8 +336,7 @@ class HmZap(MakeTags, KsgData):
             'kol_usl',
             'tarif',
             'sumv_usl',
-            'prvs',
-            'code_md',
+            ('mr_usl_n', self.mr_usl_n),
             'npl',  # ignore
         )
 
@@ -340,7 +360,7 @@ class HmZap(MakeTags, KsgData):
             'dn',  #
             'code_mes1',  # ignore
             'code_mes2',  # ignore
-             ('ksg_kpg', self.ksg_tags, 'ksg'), # object
+            ('ksg_kpg', self.ksg_tags, 'ksg'), # object
             'reab',  # ignore
             'prvs',  # data.prvs
             'vers_spec',  # self
@@ -416,7 +436,7 @@ class HmZap(MakeTags, KsgData):
             # Pacient
             'id_pac',  # tal.crd_num
             'vpolis',  # crd.polis_type
-            'npolis',  # crd.polis_num
+            #'npolis',  # crd.polis_num
             'novor',
 
             # Z_sl
@@ -450,6 +470,7 @@ class HmZap(MakeTags, KsgData):
         )
         self.cnt = (
             'idserv',
+            'mr_n'
         )
         self.list_tags = (
             'usl',

@@ -39,10 +39,9 @@ class XmlRecords:
         return _fname
 
     def write_sluch(self, stom=None):
-        # now data is DICT
-        data = pmData(self.data)
+        self.data_dict.pm_data_attrs()
 
-        if data["prvs"] in USL_PRVS:
+        if self.data_dict["prvs"] in USL_PRVS:
             assert len(self.usl) > 0, \
                 f'{data["idcase"]}-Случай SL tag : Для SPEC {data["specfic"]}, PRVS. {data["prvs"]} нет ПМУ'
 
