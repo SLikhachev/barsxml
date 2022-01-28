@@ -22,12 +22,14 @@ class BarsXml:
         self.data_dict = DataDict(mo_code=mo_code)
 
         # init sql adapter dependency
-        self.sql = get_sql_provider(config).SqlProvider(config, mo_code, self.attrs.year, month)
+        self.sql = get_sql_provider(config).SqlProvider(
+            config, mo_code, self.attrs.year, month)
 
         # init xml writer objects
         self.xml_writer = XmlWriter(self.attrs)
 
-    def make_xml(self, mark_sent: bool, get_fresh: bool, check=False): # -> tuple:
+    # -> tuple:
+    def make_xml(self, mark_sent: bool, get_fresh: bool, check=False):
         """
         mark_sent: bool if TRUE set records field talon_type = 2 else ignore
         get_fresh: bool if TRUE ignore already sent and accepted records else get all records
@@ -45,23 +47,23 @@ class BarsXml:
         """
         rcnt, errors = 0, 0
         for rdata_row in rdata:
-            self.data_dict.next_rec( self.sql.rec_to_dict(rdata_row) )
+            self.data_dict.next_rec(self.sql.rec_to_dict(rdata_row))
             idcase, card = rdata_row.idcase, rdata_row.card
-            nmo = self.sql.get_npr_mo(self.data_dict) # -> int
+            nmo = self.sql.get_npr_mo(self.data_dict)  # -> int
             try:
                 self.data_dict.data_check(nmo)
                 self.data_dict.set_usl(
                     self.sql.get_pmu_usl(idcase),
                     self.sql.get_spec_usl(rdata_row.profil)
                 )
-                self.data_dict.set_ksg( self.sql.get_ksg_data() )
+                self.data_dict.set_ksg(self.sql.get_ksg_data())
                 self.xml_writer.write_data(self.data_dict)
                 rcnt += 1
-                #break
+                # break
             except Exception as err:
-                #print(rdata_row)
-                #print(self.sql.spec_usl)
-                #raise e
+                # print(rdata_row)
+                # print(self.sql.spec_usl)
+                #raise err
                 self.xml_writer.write_error(f'{idcase}-{err}\n')
                 self.sql.set_error(idcase, card, str(err))
                 errors += 1

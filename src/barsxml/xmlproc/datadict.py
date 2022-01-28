@@ -8,12 +8,12 @@ from barsxml.xmlprod.utils import USL_PURP, USL_PRVS, \
 
 class DataDict(UserDict):
 
-    __slots__=('data', 'mo_code', 'pers')
+    __slots__ = ('data', 'mo_code', 'pers')
 
     def __init__(self, mo_code):
         super().__init__()
         self.mo_code = mo_code
-        self.pers=set()
+        self.pers = set()
 
     def next_rec(self, data: dict):
         # flush data
@@ -30,7 +30,6 @@ class DataDict(UserDict):
 
         return self
 
-
     def hm_data_attrs(self):
         """ calculate ZAP fields
             self: dict
@@ -40,7 +39,7 @@ class DataDict(UserDict):
         def _os_sluch():
             return ("os_sluch", None if bool(self["ot"]) else 2)
 
-        def __idsp():# -> int
+        def __idsp():  # -> int
             # neotl
             if self["for_pom"] == 2:
                 return 29
@@ -82,15 +81,15 @@ class DataDict(UserDict):
             return ('idsp', self.get("idsp", __idsp()))
 
         def _pcel():
-            def __pcel(for_pom, purp): # -> str
+            def __pcel(for_pom, purp):  # -> str
                 if for_pom == 2:
                     return '1.1'  # Посещениe в неотложной форме
                 if purp in (1, 2, 6, 9):  # лечебная цель
                     # SMO другой субъект
                     if self["smo_ok"] != SMO_OK:
                         if _visits == 1:
-                            return '1.0' # posesh
-                        return '3.0' # obrash
+                            return '1.0'  # posesh
+                        return '3.0'  # obrash
                     return '1.2'
                 if purp in (3, 10,):  # Диспансерное наблюдение
                     return '1.3'
@@ -105,7 +104,7 @@ class DataDict(UserDict):
 
         # Диспансерное наблюдение
         def _dn():
-            return ('dn', 1 if self["purp"] in (3, 10,)  else None)
+            return ('dn', 1 if self["purp"] in (3, 10,) else None)
 
         def _vidpom():
             if self.get("vidpom", None):
@@ -149,7 +148,6 @@ class DataDict(UserDict):
         return self
 
     def lm_data_attrs(self):
-
         """ calculate PERS fields
             self: dict
         """
@@ -204,28 +202,28 @@ class DataDict(UserDict):
     def calc_sumv(self):
         sum = 0.0
         ed_col = 0
-        for _usl in self["usl"]: #list(dict)
+        for _usl in self["usl"]:  # list(dict)
             sum += float(_usl['sumv_usl'])
-            ed_col += _usl['kol_usl'] # this is right calculation
+            ed_col += _usl['kol_usl']  # this is right calculation
 
-        sum += float( self.get("sumv", 0) )
+        sum += float(self.get("sumv", 0))
         self["sumv"] = "{0:.2f}".format(sum)
 
         # now ed_col will be present anyway
         self["ed_col"] = None
-        if True: # not data["smo"]:
+        if True:  # not data["smo"]:
             if self["idsp"] == 28:
                 self["ed_col"] = ed_col
             elif self["idsp"] == 29:
-                self["ed_col"]=1
+                self["ed_col"] = 1
 
-    def set_usl(self, usl: list[dict], usp: list[dict]):
-        self["usl"]=[]
+    def set_usl(self, usl: list, usp: list):
+        self["usl"] = []
         for _usl in chain(usl, usp):
             _usl["lpu"] = self.mo_code
 
             if _usl.get("profil", None) is None:
-                _usl['profil']=self["profil"]
+                _usl['profil'] = self["profil"]
 
             if _usl.get("det", None) is None:
                 _usl["det"] = self.get("det", 0)
@@ -241,7 +239,7 @@ class DataDict(UserDict):
             _usl['ds'] = self["ds1"]
 
             if _usl.get('sumv_usl', None) is None:
-                _usl['sumv_usl']=0
+                _usl['sumv_usl'] = 0
 
             _usl['mr_usl_n'] = [{
                 'prvs': _usl.get('prvs', self["prvs"]),
@@ -256,7 +254,8 @@ class DataDict(UserDict):
                 if self["idsp"] in (28, 29):
                     _usl['code_usl'] = _usl["code_usl1"]
                 else:
-                    _usl['code_usl'] = _usl.get("code_usl2", None) or _usl["code_usl1"]
+                    _usl['code_usl'] = _usl.get(
+                        "code_usl2", None) or _usl["code_usl1"]
                 _usl['kol_usl'] = 1
 
             # now append this dict
@@ -265,12 +264,12 @@ class DataDict(UserDict):
         # check for usl
         self.check_usl()
 
-        #then calculate sumv
+        # then calculate sumv
         self.calc_sumv()
 
     def set_ksg(self, ksg: dict = {}):
         # will be dropped in tree
-        self["ksg_kpg"]=[]
+        self["ksg_kpg"] = []
 
     def get_pers(self):
         if self["id_pac"] in self.pers:

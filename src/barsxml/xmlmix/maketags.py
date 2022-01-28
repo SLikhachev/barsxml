@@ -25,15 +25,14 @@ class XmlTreeMaker:
     __slots__ = ('mo_code', 'mo', 'lpu', 'xns', 'const', 'countable', 'count')
 
     def __init__(self, mo_code: str, mo: str):
-        self.mo_code = mo_code # string(6) digits
-        self.mo = mo # string(3) last 3 digits
-        self.lpu= mo_code
-        self.xns={'hm': hmNS, 'pm': pmNS, 'lm': lmNS}
-        self.const={}
-        self.countable={}
-        self.count={}
+        self.mo_code = mo_code  # string(6) digits
+        self.mo = mo  # string(3) last 3 digits
+        self.lpu = mo_code
+        self.xns = {'hm': hmNS, 'pm': pmNS, 'lm': lmNS}
+        self.const = {}
+        self.countable = {}
+        self.count = {}
         self.init_const_count()
-
 
     def init_const_count(self):
         for ns_name, ns_obj in self.xns.items():
@@ -49,7 +48,7 @@ class XmlTreeMaker:
                 self.count[ns_name] = {}
                 self.countable[ns_name] = count
 
-    def next_item(self, cns:str, tag:str):
+    def next_item(self, cns: str, tag: str):
         if self.count.get(cns, None) is None:
             return None
         if self.count[cns].get(tag, None) is None:
@@ -59,19 +58,19 @@ class XmlTreeMaker:
         self.count[cns][tag] += 1
         return self.count[cns][tag]
 
-    def next_init(self, cns:str, tag:str):
-        tcount =  self.countable[cns].get(tag, None)
+    def next_init(self, cns: str, tag: str):
+        tcount = self.countable[cns].get(tag, None)
         if tcount:
-            self.count[cns][ tcount ] = 0
+            self.count[cns][tcount] = 0
 
-    def nxt_el(self, tag: str, val: str | None):
-        if val is None or len( str(val) ) == 0:
+    def nxt_el(self, tag: str, val: any):
+        if val is None or len(str(val)) == 0:
             return None
         _el = ET.Element(tag.upper())
         _el.text = f'{val}'
         return _el
 
-    def leaf_els(self, cns: str, tag: str | tuple, data: DataDict | dict):
+    def leaf_els(self, cns: str, tag: any, data: dict):
         """ cns current namespace
             tag current tag
             data current UserDict
@@ -83,17 +82,18 @@ class XmlTreeMaker:
             assert isinstance(tag[0], str), f"Неверная структра элемента {tag}"
             value = data.get(tag[0].lower(), None)
 
-            #print(f'{tag[0]}={value}')
+            # print(f'{tag[0]}={value}')
 
             # if must be dropped, enclosed trees should be present as empty list in data
             if isinstance(value, list):
                 if len(value) > 0:
-                    return self.make_list(cns, tag, value)  # return an [ET.Element]
+                    # return an [ET.Element]
+                    return self.make_list(cns, tag, value)
                 # drop this tree
                 return None
 
             # return single tree el
-            return [ self.make_tree(cns, tag, data) ]
+            return [self.make_tree(cns, tag, data)]
 
         # simple tag
         # ignore tag
@@ -111,7 +111,8 @@ class XmlTreeMaker:
 
         if val is None:
             if tag in self.xns[cns].REQUIRED:
-                raise AttributeError(f'{data["idcase"]}-Нет тега: {tag} в талоне')
+                raise AttributeError(
+                    f'{data["idcase"]}-Нет тега: {tag} в талоне')
             return None
 
         # many same tags with differnet text value
@@ -119,9 +120,9 @@ class XmlTreeMaker:
             return [self.nxt_el(tag, v) for v in val]
 
         # simple text tag
-        return [ self.nxt_el(tag, val) ]
+        return [self.nxt_el(tag, val)]
 
-    def make_tree(self, cns: str, tree: tuple, data: DataDict | dict):
+    def make_tree(self, cns: str, tree: tuple, data: dict):
         """ Start make Xml Tree
             tags must be tuple always
             (root: string, body: tuple)
@@ -134,12 +135,12 @@ class XmlTreeMaker:
                 continue
             try:
                 for _el in els:
-                    if isinstance (_el, ET.Element):
+                    if isinstance(_el, ET.Element):
                         proot.append(_el)
             except Exception as _e:
                 raise TagError(
-                f'{data["idcase"]}-Ошибка формиривания: TagError::  root: {root}, tag: {tag}, el: {_el}',
-                _e) from _e
+                    f'{data["idcase"]}-Ошибка формиривания: TagError::  root: {root}, tag: {tag}, el: {_el}',
+                    _e) from _e
 
         return proot
 
