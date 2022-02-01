@@ -30,11 +30,11 @@ HmStruct = SN(
             'vpolis',  # crd.polis_type || tal.polis_type
             'spolis',  # crd.polis_ser || tal.polis_ser
             'npolis',  # crd.polis_num || tal.polis_num
+            'enp', #crd.enp || tal.enp
             'st_okato',  # crd.st_okato
             'smo',  # crd.smo || tal.smo
             #'smo_ogrn',  # crd.smo_ogrn
             #'smo_ok',  # crd.smo_okato || tal.smo_okato
-            'enp', #crd.enp || tal.enp
             'smo_nam',  # crd.smo_name
             'inv',  # ignore
             'mse',  # ignore
