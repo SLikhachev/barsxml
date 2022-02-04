@@ -29,7 +29,7 @@ def make_hdr_dict(cfg: ConfigAttrs, sd_z: int =0, summ: str ='0.00'): # -> dict
         'code_mo': cfg.mo_code,
         'lpu': cfg.mo,
         'year': cfg.year,
-        'month': month,
+        'month': int(month),
         'p_file': f'P{file}',
         'h_file': f'H{file}',
         'l_file': f'L{file}',
