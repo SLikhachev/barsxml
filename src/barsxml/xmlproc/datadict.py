@@ -122,7 +122,7 @@ class DataDict(UserDict):
             if self["profil"] in (78, 82):
                 vidpom = 11
                 # MTR only since may 2020
-                if not self["smo"]:
+                if self["smo_ok"] != SMO_OK:
                     vidpom = 13
             elif self["prvs"] in (76, ) and self["profil"] in (97, 160):
                 vidpom = 12
