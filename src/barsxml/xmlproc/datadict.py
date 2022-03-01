@@ -7,6 +7,9 @@ from barsxml.xmlprod.utils import USL_PURP, USL_PRVS, \
 
 
 class DataDict(UserDict):
+    """ class
+
+    """
 
     __slots__ = ('data', 'mo_code', 'pers')
 
@@ -16,7 +19,8 @@ class DataDict(UserDict):
         self.pers = set()
 
     def next_rec(self, data: dict):
-        # flush data
+        """flush data
+        """
         self.data = data
 
     def pm_data_attrs(self):
@@ -86,10 +90,11 @@ class DataDict(UserDict):
                     return '1.1'  # Посещениe в неотложной форме
                 if purp in (1, 2, 6, 9):  # лечебная цель
                     # SMO другой субъект
+                    # выдает ошибки 25065 (видать неправильно)
                     if self["smo_ok"] != SMO_OK:
-                        if _visits == 1:
-                            return '1.0'  # posesh
-                        return '3.0'  # obrash
+                        if _visits == 1: pass
+                            #return '1.0'  # posesh
+                        #return '3.0'  # obrash
                     return '1.2'
                 if purp in (3, 10,):  # Диспансерное наблюдение
                     return '1.3'
