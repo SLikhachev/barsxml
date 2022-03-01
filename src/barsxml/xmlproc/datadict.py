@@ -85,21 +85,25 @@ class DataDict(UserDict):
             return ('idsp', self.get("idsp", __idsp()))
 
         def _pcel():
+
+            def __inokray():
+                # SMO другой субъект
+                # выдает ошибки 25065 (видать неправильно)
+                if self["smo_ok"] != SMO_OK:
+                    if _visits == 1:
+                        return '1.0'  # posesh
+                    return '3.0'  # obrash
+                return None
+
             def __pcel(for_pom, purp):  # -> str
                 if for_pom == 2:
                     return '1.1'  # Посещениe в неотложной форме
                 if purp in (1, 2, 6, 9):  # лечебная цель
-                    # SMO другой субъект
-                    # выдает ошибки 25065 (видать неправильно)
-                    if self["smo_ok"] != SMO_OK:
-                        if _visits == 1: pass
-                            #return '1.0'  # posesh
-                        #return '3.0'  # obrash
-                    return '1.2'
+                    return __inokray() or '1.2'
                 if purp in (3, 10,):  # Диспансерное наблюдение
                     return '1.3'
                 if purp in (4, 5, 14, 20, 21):  # Медицинский осмотр
-                    return '2.1'
+                    return __inokray() or '2.1'
                 if purp == 7:  # Патронаж
                     return '2.5'
                 return '2.6'  # Посещение по другим обстоятельствам
