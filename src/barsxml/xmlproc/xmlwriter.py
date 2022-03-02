@@ -1,4 +1,4 @@
-
+""" XmlWRiter class definition"""
 
 import os
 import shutil
@@ -18,7 +18,7 @@ from barsxml.xmlproc.hdrdict import make_hm_hdr, make_pm_hdr, make_lm_hdr
 
 
 class XmlWriter:
-
+    """ calss XmlWriter """
     Ns = ('hm', 'pm', 'lm')
     NsTags = (hmNS.ZAP, pmNS.SLUCH, lmNS.PERS)
     HdrNsFn = (
@@ -39,19 +39,21 @@ class XmlWriter:
 
         error_file_name = cfg.xmldir / \
             f"errors_{cfg.pack_type}{str(time())[10:14]}.txt"
-        self.error_fd = open(error_file_name, "w")
+        self.error_fd = open(error_file_name, "w", encoding='utf-8')
 
     def init_files(self, check: bool):
+        """ opens tmp files for write report """
         self.check = check
         if check:
             return
         self.ns_files = [tmpf(mode="r+", encoding="1251") for _ in self.Ns]
 
     def write_error(self, error: str):
+        """ write error """
         self.error_fd.write(error)
 
     def write_hdr_body(self, tmpdir: TemporaryDirectory, hdr_ns: str):
-
+        """ write hdr body to file """
         ns_idx = self.Ns.index(hdr_ns)
         make_hdr_fn, cns = self.HdrNsFn[ns_idx]
 
@@ -86,7 +88,8 @@ class XmlWriter:
         return _fname
 
     def write_data(self, data):
-        # add person to set
+        """ write data to file """
+        #add person to set
         pers = data.get_pers()
         if self.check:
             return  # no IO required
@@ -100,7 +103,7 @@ class XmlWriter:
             file.write('\n')
 
     def make_zip(self, rcnt):
-        # make zip file anyway and return it
+        """ make zip file anyway and return it """
         with TemporaryDirectory() as tmpdir:
             self.hdr = make_hdr_dict(self.cfg, sd_z=rcnt, summ='0.00')
             to_zip = [self.write_hdr_body(tmpdir, cns) for cns in self.Ns]
@@ -116,6 +119,7 @@ class XmlWriter:
             shutil.make_archive(str(base_name), 'zip', tmpdir)
 
     def close(self, rcnt: int, pers: int, errors: int):
+        """ close open files """
         if not self.error_fd.closed:
             self.error_fd.close()
             if errors == 0:

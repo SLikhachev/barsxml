@@ -1,4 +1,4 @@
-
+""" main class definition """
 
 # NO reason as for time consumption
 #from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -10,9 +10,7 @@ from barsxml.xmlproc.datadict import DataDict
 
 
 class BarsXml:
-    """ Main container for process
-
-        """
+    """ Main container for process """
 
     def __init__(self, config: object, pack_type: str, mo_code: str, month: str, pack_num: int):
         # init Configs
@@ -44,7 +42,7 @@ class BarsXml:
         if len(rdata) == 0:
             return self.close(rc)
             #raise Exception("Length of the fetched sql data is zero ")
-        """
+            """
         rcnt, errors = 0, 0
         for rdata_row in rdata:
             self.data_dict.next_rec(self.sql.rec_to_dict(rdata_row))

@@ -1,9 +1,11 @@
+""" Data Dict class definition """
+
 ##
 from itertools import chain
 from collections import UserDict
 from barsxml.xmlprod.utils import data_checker, _iddokt
 from barsxml.xmlprod.utils import USL_PURP, USL_PRVS, \
-    PROFOSM_PURP, SESTRY_PROF, STOM_PROF, SMO_OK, ED_COL_IDSP
+    PROFOSM_PURP, SESTRY_PROF, STOM_PROF, SMO_OK #, ED_COL_IDSP
 
 
 class DataDict(UserDict):
@@ -19,8 +21,7 @@ class DataDict(UserDict):
         self.pers = set()
 
     def next_rec(self, data: dict):
-        """flush data
-        """
+        """ flush data """
         self.data = data
 
     def pm_data_attrs(self):
@@ -176,7 +177,7 @@ class DataDict(UserDict):
                 _dost.append(1)
             if not bool(self.get("fam", None)):
                 _dost.append(2)
-            if not (self.get("im", None)):
+            if not self.get("im", None):
                 _dost.append(3)
             return ('dost', _dost)
 
@@ -199,24 +200,27 @@ class DataDict(UserDict):
         return self
 
     def data_check(self, nmo: int):
+        """ check data """
         data_checker(self, int(self.mo_code[3:]), nmo)
         # prepare dict to write
         self.hm_data_attrs().pm_data_attrs().lm_data_attrs()
 
-    def check_usl(self):
+    def check_pmu(self, pmu: int):
+        """ check pmu """
         if self["prvs"] in USL_PRVS:
-            assert len(self["usl"]) > 0, \
+            assert pmu > 0, \
                 f'{self["idcase"]}-Для SPEC {self["specfic"]}, PRVS. {self["prvs"]} нет ПМУ'
 
     def calc_sumv(self):
-        sum = 0.0
+        """ calc """
+        _sum = 0.0
         ed_col = 0
         for _usl in self["usl"]:  # list(dict)
-            sum += float(_usl['sumv_usl'])
+            _sum += float(_usl['sumv_usl'])
             ed_col += _usl['kol_usl']  # this is right calculation
 
-        sum += float(self.get("sumv", 0))
-        self["sumv"] = "{0:.2f}".format(sum)
+        _sum += float(self.get("sumv", 0))
+        self["sumv"] = "{0:.2f}".format(_sum)
 
         # now ed_col will be present anyway
         self["ed_col"] = None
@@ -227,7 +231,10 @@ class DataDict(UserDict):
                 self["ed_col"] = 1
 
     def set_usl(self, usl: list, usp: list):
+        """ set usl """
         self["usl"] = []
+        # to calc pmus number
+        pmu: int = 0
         for _usl in chain(usl, usp):
             _usl["lpu"] = self.mo_code
 
@@ -257,6 +264,8 @@ class DataDict(UserDict):
                     _usl.get('code_md', self["iddokt"])
                 )
             }]
+            pmu += 1 if _usl.get('code_usl', None) else 0
+            # check for real pmu usl
 
             # usp
             if _usl.get('code_usl1', None) is not None:
@@ -271,16 +280,18 @@ class DataDict(UserDict):
             self["usl"].append(_usl)
 
         # check for usl
-        self.check_usl()
+        self.check_pmu(pmu)
 
         # then calculate sumv
         self.calc_sumv()
 
     def set_ksg(self, ksg: dict = {}):
+        """ set ksg (unused) """
         # will be dropped in tree
         self["ksg_kpg"] = []
 
     def get_pers(self):
+        """ get pesr by id """
         if self["id_pac"] in self.pers:
             return None
         self.pers.add(self["id_pac"])
