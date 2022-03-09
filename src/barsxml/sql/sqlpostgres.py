@@ -1,60 +1,72 @@
+""" sql postgresql """
 
-import psycopg2, psycopg2.extras
+import psycopg2
+import psycopg2.extras
 from barsxml.sql.sqlbase import SqlBase
 from barsxml.config import postgresxml as pg
 
 # Postgres Sql PROVIDER
 class SqlProvider(SqlBase):
+    """ class """
 
     def __init__(self, config, mo_code, year, month):
+        """ init """
         super().__init__(config, mo_code, year, month)
         dbc =  getattr(config, 'SQL_SRV', {})
+        self.schema = dbc.get('schema', 'public')
         try:
-            self.db = psycopg2.connect(
+            self._db = psycopg2.connect(
                 port=dbc.get('port', 5432),
                 host=dbc.get('host', ''),
                 dbname=dbc['dbname'],
                 user=dbc['user'],
                 password=dbc['password']
             )
-        except KeyError as e:
-            raise AttributeError(f'Inavalid DBC {e}') from e
-        except psycopg2.Error as e:
-            raise EnvironmentError(f"Can't connect to DB {e}") from e
+        except KeyError as kexc:
+            raise AttributeError(f'Inavalid DBC {kexc}') from kexc
+        except psycopg2.Error as pexc:
+            raise EnvironmentError(f"Can't connect to DB {pexc}") from pexc
 
-        self.qurs = self.db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
-        self.qurs1 = self.db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
+        self.qurs = self._db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
+        self.qurs1 = self._db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
 
         self.usl = {}
         self.spec_usl = {}
         self.mo_local={}
+        self.init_session()
         self.get_local_mo()
         self.truncate_errors()
         self.talon_tbl = f'{pg.TALONZ_CLIN}{self.ye_ar}'
         self.para_tbl = f'{pg.PARA_CLIN}{self.ye_ar}'
 
+    def init_session(self):
+        """ set default search path to """
+        self.qurs.execute(pg.SET_SCHEMA, (self.schema,))
+
     def truncate_errors(self):
         self.qurs1.execute(pg.TRUNCATE_ERRORS)
-        self.db.commit()
+        self._db.commit()
 
     def get_local_mo(self):
+        """ get local mo """
         self.qurs1.execute(pg.GET_ALL_LOCAL_MO)
-        for mo in self.qurs1.fetchall():
-            self.mo_local[mo.scode] = mo.code
+        for _mo in self.qurs1.fetchall():
+            self.mo_local[_mo.scode] = _mo.code
 
-    def get_hpm_data(self, type: str, get_fresh: bool) -> object:
+    def get_hpm_data(self, pack_type: str, get_fresh: bool): # -> object:
         self.qurs.execute(
             pg.GET_HPM_DATA,
             (self.talon_tbl, int(self.month), get_fresh))
         return self.qurs.fetchall()
 
-    def get_npr_mo(self, data: dict):# -> int or None:
+    def get_npr_mo(self, data: dict): # -> int or None:
         npr = data.get('from_firm', None)
         if npr:
             return self.mo_local.get(npr, None)
         return None
 
     def get_all_usl(self): #
+        """ get al usl """
         self.qurs1.execute(pg.GET_ALL_USL, (
             self.talon_tbl, self.para_tbl, int(self.month)))
         for usl in self.qurs1.fetchall():
@@ -64,7 +76,7 @@ class SqlProvider(SqlBase):
             # list of namedtuples
             self.usl[usl.idcase].append(usl)
 
-    def get_pmu_usl(self, idcase: int):# -> list(dict):
+    def get_pmu_usl(self, idcase: int): # -> list(dict):
         usl = []
         for _usl in self.usl.get(idcase, []):
             # _usl - Record namedtuple
@@ -72,6 +84,7 @@ class SqlProvider(SqlBase):
         return usl
 
     def get_all_usp(self):
+        """ get all usp """
         self.qurs1.execute(pg.GET_SPEC_USL)
         for usl in self.qurs1.fetchall():
             # list of namedtuple
@@ -94,5 +107,5 @@ class SqlProvider(SqlBase):
     def close(self):
         self.qurs.close()
         self.qurs1.close()
-        self.db.commit()
-        self.db.close()
+        self._db.commit()
+        self._db.close()

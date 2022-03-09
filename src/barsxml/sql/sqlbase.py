@@ -1,10 +1,9 @@
-
+""" sql base """
 from abc import ABC, abstractmethod
 import barsxml.config as bcfg
 
-
 class SqlBase(ABC):
-
+    """ class sql base """
     def __init__(self, config: object, mo_code: str, year: str, month: str):
         self.config = config
         self.mo_code = mo_code  # full code 250747
@@ -14,11 +13,11 @@ class SqlBase(ABC):
 
     @abstractmethod
     def get_hpm_data(self, pack_type: str, get_fresh: bool):# -> object:
-        pass
+        """ get hpm data """
 
     @staticmethod
     def rec_to_dict(rec: object):# -> dict:
-        # dict
+        """ dict """
         if isinstance(rec, dict):
             return rec
 
@@ -42,6 +41,7 @@ class SqlBase(ABC):
 
     @staticmethod
     def get_ksg_data(n_ksg: str = ''):# -> dict:
+        """ ksg  """
         if len(n_ksg) == 0:
             return {}
         ksg = getattr(bcfg, 'KSG', {})
@@ -56,32 +56,31 @@ class SqlBase(ABC):
 
     @abstractmethod
     def get_npr_mo(self, data: dict):# -> int or None:
-        pass
+        """ npr mo """
 
     @abstractmethod
     def get_pmu_usl(self, idcase: int):# -> dict:
-        pass
+        """ pmu usl """
 
     @abstractmethod
-    def get_spec_usl(self, data: dict):# -> list:
-        pass
+    def get_spec_usl(self, profil: int):# -> list:
+        """ spec usl """
 
     @abstractmethod
     def set_error(self, idcase: int, card: str, error: str):
-        pass
+        """ set error """
 
     @abstractmethod
-    def mark_as_sent(self, data: dict):
-        pass
+    def mark_as_sent(self, idcase: int):
+        """ mark as sent """
 
-    def check_covid(self, data: dict):
+    def check_covid(self, *args):
         return False
 
     @abstractmethod
     def truncate_errors(self):
-        pass
+        """ truncate """
 
     @abstractmethod
     def close(self):
-        pass
-
+        """ close """
