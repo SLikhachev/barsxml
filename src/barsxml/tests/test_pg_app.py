@@ -1,4 +1,4 @@
-
+""" test """
 
 import importlib
 from datetime import datetime
@@ -6,9 +6,10 @@ from barsxml.xmlprod.barsxml import BarsXml
 
 
 def test_app():
+    """ test """
     time1 = datetime.now()
     config = importlib.import_module('barsxml.tests.xml_pg_config')
-    xml = BarsXml(config, 'app', '250796', '01', 1)
+    xml = BarsXml(config, 'app', '250796', '11', 1)
     rc, pc, zname, errors = xml.make_xml(False, False, False)
     log = f"APP rc={rc}  pc={pc}  zname={zname}, errors={errors}"
     print(log)

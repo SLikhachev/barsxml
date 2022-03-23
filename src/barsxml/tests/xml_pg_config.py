@@ -7,12 +7,14 @@ SQL_SRV = dict(
     host='127.0.0.1',
     dbname='hokuto',
     user='postgres',
-    password='boruh'
+    password='boruh',
+    schema='public',
+    dbauth=None
 )
 
 tests_dir = Path.script_dir()
 MO_CODE = "250796"
-YEAR = "2022"
+YEAR = "2021"
 BASE_XML_DIR = tests_dir / 'data' / 'hokuto'
 
 DS = dict(

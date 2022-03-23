@@ -1,9 +1,9 @@
-
+""" module """
 from datetime import date
 from barsxml.xmlproc.configx import ConfigAttrs
 
 
-_xml_tag='<?xml version="1.0" encoding="windows-1251"?>'
+XML='<?xml version="1.0" encoding="windows-1251"?>'
 
 
 def make_hdr_dict(cfg: ConfigAttrs, sd_z: int =0, summ: str ='0.00'): # -> dict
@@ -34,9 +34,9 @@ def make_hdr_dict(cfg: ConfigAttrs, sd_z: int =0, summ: str ='0.00'): # -> dict
         'h_file': f'H{file}',
         'l_file': f'L{file}',
         'pack_name': f'H{cfg.mo_code}{cfg.year[-1]}{month}{cfg.pack_type_digit}{pack}.zip',
-        'xml_tag': _xml_tag,
+        'xml_tag': XML,
         'data': data,
-        'start_tag': f'{_xml_tag}\n<ZL_LIST>\n',
+        'start_tag': f'{XML}\n<ZL_LIST>\n',
         'end_tag': '</ZL_LIST>',
         'sd_z': f'{sd_z}',
         'nschet': f'{code}{pack}',
@@ -45,16 +45,19 @@ def make_hdr_dict(cfg: ConfigAttrs, sd_z: int =0, summ: str ='0.00'): # -> dict
     }
 
 def make_hm_hdr( hdr: dict ): #->dict
+    """ make """
     hdr["filename"] = hdr["h_file"]
 
 
 def make_pm_hdr( hdr: dict ): #->dict
+    """ make """
     hdr["filename"] = hdr["p_file"]
     hdr["filename1"] = hdr["h_file"]
 
 
 def make_lm_hdr( hdr: dict ): #->dict
-    hdr["start_tag"] = f'{_xml_tag}\n<PERS_LIST>\n'
+    """ make """
+    hdr["start_tag"] = f'{XML}\n<PERS_LIST>\n'
     hdr["end_tag"] = '</PERS_LIST>'
     hdr["filename"] = hdr["l_file"]
     hdr["filename1"] = hdr["h_file"]

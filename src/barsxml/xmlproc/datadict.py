@@ -285,7 +285,7 @@ class DataDict(UserDict):
         # then calculate sumv
         self.calc_sumv()
 
-    def set_ksg(self, ksg: dict = {}):
+    def set_ksg(self, ksg: dict):
         """ set ksg (unused) """
         # will be dropped in tree
         self["ksg_kpg"] = []

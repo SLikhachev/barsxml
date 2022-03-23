@@ -82,5 +82,5 @@ class SqlBase(ABC):
         """ truncate """
 
     @abstractmethod
-    def close(self):
+    def close(self, _rc):
         """ close """

@@ -38,11 +38,13 @@ class BarsXml:
         self.sql.get_all_usp()
         self.sql.get_all_usl()
         rdata = self.sql.get_hpm_data(self.attrs.pack_type, get_fresh)
+
         """
         if len(rdata) == 0:
-            return self.close(rc)
+            return self.sql.close()
             #raise Exception("Length of the fetched sql data is zero ")
             """
+
         rcnt, errors = 0, 0
         for rdata_row in rdata:
             self.data_dict.next_rec(self.sql.rec_to_dict(rdata_row))

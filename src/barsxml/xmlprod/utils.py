@@ -1,4 +1,4 @@
-
+""" module """
 from types import SimpleNamespace
 import re
 from functools import reduce
@@ -31,7 +31,7 @@ REGION = '250'
 SMO_OK = "05000"
 
 class RowObject(SimpleNamespace):
-
+    """ class """
     def __init__(self, row):
         if isinstance(row, dict):
             self.from_dict(row)
@@ -43,58 +43,66 @@ class RowObject(SimpleNamespace):
             raise TypeError(f'Row Object has non supported type: {type(row)}')
 
     def from_dict(self, data):
+        """ from_dict """
         for name, value in data.items():
             setattr(self, name, value)
 
     def psycopg_row_data(self, data):
-         for name, value in data._asdict().items():
-             setattr(self, name, value)
+        """ row_data """
+        for name, value in data._asdict().items():
+            setattr(self, name, value)
 
     def odbc_row_data(self, data):
+        """ row data """
         def attrs(idx, desc):
-            d = data[idx]
-            if isinstance(d, float):
-                d = int(d)
-            setattr(self, desc[0], d)
+            _d = data[idx]
+            if isinstance(_d, float):
+                _d = int(_d)
+            setattr(self, desc[0], _d)
             idx += 1
             return idx
 
         reduce(attrs, data.cursor_description, 0)
 
+SNILS = r'^\d{3}-\d{3}-\d{3} \d\d$'
+IDDOKT = r'^\d{11}$'
 
-def _iddokt(id, snils):
-    sl = snils.split('-')
-    if len(sl) == 4:
-        sn = f"{'-'.join(sl[:3])} {sl[3]}"
+def _iddokt(_id: str, snils: str):
+    if re.fullmatch(IDDOKT, snils):
+        return snils
+    _sl = snils.split('-')
+    if len(_sl) == 4:
+        _sn = f"{'-'.join(_sl[:3])} {_sl[3]}"
     else:
-        sn = snils
-    assert re.fullmatch('^\d{3}-\d{3}-\d{3} \d\d$', sn), \
-       f"{id}-СНИЛС доктора - неверный формат"
-    return sn
+        _sn = snils
+    assert re.fullmatch(SNILS, _sn), \
+       f"{_id}-СНИЛС доктора - неверный формат: {_sn}"
+    return _sn.replace('-', '').replace(' ', '')
+    #return _sn
 
 
-def fmt_000(val):
+def _fmt_000(val):
     if val is None:
         return ''
-    v = int(val)
-    s = "{0:03d}".format(v)
-    if len(s) > 3:
-        return s[-3:]
-    return s
+    _v = int(val)
+    _s = "{0:03d}".format(_v)
+    if len(_s) > 3:
+        return _s[-3:]
+    return _s
 
 
-def _date(id, d):
+def _date(_id: str, _d: dict):
     '''
         tal.open_date as date_1,
         tal.close_date as date_2,
         tal.crd_num as card,
     '''
-    assert d["date_1"] and d["date_2"], f'{id}-Нет даты талона'
-    assert d["date_2"] >= d["date_1"], f'{id}-Дата 1 больше даты 2'
-    assert d["card"], f'{id}-Нет карты талона'
+    assert _d["date_1"] and _d["date_2"], f'{_id}-Нет даты талона'
+    assert _d["date_2"] >= _d["date_1"], f'{_id}-Дата 1 больше даты 2'
+    assert _d["card"], f'{_id}-Нет карты талона'
 
 
-def _smo_polis(id, d):
+def _smo_polis(_id: str, _d: dict):
     '''
         tal.mek, -- as pr_nov,
 
@@ -114,12 +122,12 @@ def _smo_polis(id, d):
         crd.smo_okato as smo_ok,
         crd.smo_name as smo_nam,
     '''
-    if not d.get("pr_nov", None):
-        d["pr_nov"] = 1 if bool(d.get("mek", 0)) else 0
+    if not _d.get("pr_nov", None):
+        _d["pr_nov"] = 1 if bool(_d.get("mek", 0)) else 0
 
     # set smo, polis from talon
-    if d.get("polis_type", None) is not None and \
-        d.get("polis_num", None) is not None:
+    if _d.get("polis_type", None) is not None and \
+        _d.get("polis_num", None) is not None:
 
         for attr in (
                 ("vpolis", "polis_type"),
@@ -128,43 +136,43 @@ def _smo_polis(id, d):
                 ("smo", "tal_smo"),
                 #("smo_ok" , "smo_okato"),
                 ("id_pac", "polis_num")):
-            d[ attr[0] ] = d[ attr[1] ]
+            _d[ attr[0] ] = _d[ attr[1] ]
 
 
-    assert d.get("vpolis", None), f'{id}-Тип полиса не указан'
-    assert d.get("npolis", None), f'{id}-Номер полиса не указан'
-    if d["vpolis"] == 1:
-        assert d.get("spolis", None) and d["npolis"], \
-            f'{id}-Тип полиса не соответвует типу 1 (старый)'
-    elif d["vpolis"] == 2:
-        assert len(d["npolis"]) == 9, \
-            f'{id}-Тип полис не времянка, не соответвует VPOLIS 2 (времянка)'
-    elif d["vpolis"] == 3:
-        assert len(d["npolis"]) == 16, \
-            f'{id}-Тип полис не ЕНП, не соответвует VPOLIS 3 (ЕНП)'
+    assert _d.get("vpolis", None), f'{_id}-Тип полиса не указан'
+    assert _d.get("npolis", None), f'{_id}-Номер полиса не указан'
+    if _d["vpolis"] == 1:
+        assert _d.get("spolis", None) and _d["npolis"], \
+            f'{_id}-Тип полиса не соответвует типу 1 (старый)'
+    elif _d["vpolis"] == 2:
+        assert len(_d["npolis"]) == 9, \
+            f'{_id}-Тип полис не времянка, не соответвует VPOLIS 2 (времянка)'
+    elif _d["vpolis"] == 3:
+        assert len(_d["npolis"]) == 16, \
+            f'{_id}-Тип полис не ЕНП, не соответвует VPOLIS 3 (ЕНП)'
 ## -------------------------------------
         # as for H VERSION = 3.2 ENP tag
-        d["enp"] = d["npolis"]
-        del d["npolis"]
+        _d["enp"] = _d["npolis"]
+        del _d["npolis"]
 ## -------------------------------------
     else:
-        raise AttributeError(f'{id}-Тип полиса не поддерживаем')
+        raise AttributeError(f'{_id}-Тип полиса не поддерживаем')
 
     # smo is logical False (empty string or zero value)
-    smo = d.get("smo", None)
+    smo = _d.get("smo", None)
     if smo is not None and not bool(smo):
-        d["smo"] = None
+        _d["smo"] = None
 
     # as for H VERSION = 3.2 SMO_OK tag was deleted
-    assert d.get("smo", None) or d.get("smo_ogrn", None), f'{id}-Нет ни СМО ни СМО ОГРН'
+    assert _d.get("smo", None) or _d.get("smo_ogrn", None), f'{_id}-Нет ни СМО ни СМО ОГРН'
 
     try:
-        d["id_pac"] = int(d["id_pac"])
+        _d["id_pac"] = int(_d["id_pac"])
     except ValueError:
-        raise ValueError(f'{id}-Номер полиса не целое число')
+        raise ValueError(f'{_id}-Номер полиса не целое число')
 
 
-def _purp(id, d):
+def _purp(_id: str, _d: dict):
     '''
         tal.doc_spec as specfic,
 
@@ -174,30 +182,30 @@ def _purp(id, d):
         tal.rslt,
         tal.ishod,
     '''
-    # assert self.specfic, f'{id}-SPECFIC ( специальность из регионального справочника) не указан'
-    if not d["purp"]:
-        d["purp"] = 2  # for usl_ok=2
-    assert d[ "usl_ok"], f'{id}-USL_OK (условия оказания) не указан'
-    assert d[ "for_pom"], f'{id}-FOR_POM (форма помощи) не указан'
-    assert d[ "rslt"] and d["ishod"], f'{id}-RESULT/ISHOD (исход, результат) не указан'
+    # assert self.specfic, f'{_id}-SPECFIC ( специальность из регионального справочника) не указан'
+    if not _d["purp"]:
+        _d["purp"] = 2  # for usl_ok=2
+    assert _d[ "usl_ok"], f'{_id}-USL_OK (условия оказания) не указан'
+    assert _d[ "for_pom"], f'{_id}-FOR_POM (форма помощи) не указан'
+    assert _d[ "rslt"] and _d["ishod"], f'{_id}-RESULT/ISHOD (исход, результат) не указан'
 
 
-def _visits(id, d):
+def _visits(_id: str, _d: dict):
     '''
         tal.visit_pol,
         tal.visit_home as visit_hom,
     '''
-    if d["usl_ok"] == 3:
-        assert d["visit_pol"] or d["visit_hom"], f'{id}-Нуль количество посещений АПП'  # yet
+    if _d["usl_ok"] == 3:
+        assert _d["visit_pol"] or _d["visit_hom"], f'{_id}-Нуль количество посещений АПП'  # yet
         return
-    if d["usl_ok"] == 2:
-        d["kd_z"] = d["visit_ds"] if d["visit_ds"] else d["visit_hs"]
-        assert d["kd_z"],  f'{id}-Нуль количество посещений ДС'
+    if _d["usl_ok"] == 2:
+        _d["kd_z"] = _d["visit_ds"] if _d["visit_ds"] else _d["visit_hs"]
+        assert _d["kd_z"],  f'{_id}-Нуль количество посещений ДС'
         return
-    assert False, f'{id}- Неверный тип USL_OK для АПП, ДС'
+    assert False, f'{_id}- Неверный тип USL_OK для АПП, ДС'
 
 # приняли на консультацию
-def _naprav_cons(id, d):
+def _naprav_cons(_id: str, _d: dict):
     '''
         tal.npr_date
         tal.npr_mo as from_firm,
@@ -206,47 +214,48 @@ def _naprav_cons(id, d):
         tal.d_type,
     '''
     # consultaciya
-    if d["npr_mo"]:
-        if d.get("from_firm", None) is None:
-            d["from_firm"] = d["npr_mo"][-3:]
-        if d["from_firm"] != d["mo"]:
+    if _d["npr_mo"]:
+        if _d.get("from_firm", None) is None:
+            _d["from_firm"] = _d["npr_mo"][-3:]
+        if _d["from_firm"] != _d["mo"]:
             pass
-        #    assert d.get("naprlech", False), f'{id}-Консультация нет Напаравления в другое МО'
-        if d.get("npr_date", None) is None:
-            d["npr_date"] = d["date_1"]
+        #    assert d.get("naprlech", False), f'{_id}-Консультация нет Напаравления в другое МО'
+        if _d.get("npr_date", None) is None:
+            _d["npr_date"] = _d["date_1"]
         return
 
     # diagnostic planovaya
-    if ( int(d["prvs"]) in USL_PRVS) and int(d["for_pom"]) == 3:
+    if ( int(_d["prvs"]) in USL_PRVS) and int(_d["for_pom"]) == 3:
     # other MO need napravlenie
         # ----------------------
         # this code is a just dirty hack
         # these records need to drop out
-        if d.get("from_firm", None) is None:
-            d["from_firm"] = d["mo"]
+        if _d.get("from_firm", None) is None:
+            _d["from_firm"] = _d["mo"]
         #  ---------------------
-        d["npr_date"] = d.get("npr_date", d["date_1"])
-        if d["from_firm"] != d["mo"]:
-            d["npr_mo"] = f'{REGION}{d["from_firm"]}'
-            #assert d.get("naprlech", False), f'{id}-Диагностика, нет Напаравления или МО направления'
+        _d["npr_date"] = _d.get("npr_date", _d["date_1"])
+        if _d["from_firm"] != _d["mo"]:
+            _d["npr_mo"] = f'{REGION}{_d["from_firm"]}'
+            #assert d.get("naprlech", False),
+            # f'{_id}-Диагностика, нет Напаравления или МО направления'
         else:
             # diagnostic in self MO no naprav needed
-            d["npr_mo"] = f'{REGION}{d["mo"]}'
+            _d["npr_mo"] = f'{REGION}{_d["mo"]}'
 
     # DS
-    if d["usl_ok"] == 2:
-        assert d.get("naprlech", False), f'{id}-ДС, нет Напаравления'
-        d["npr_mo"] = f'{REGION}{d["mo"]}'
-        d["npr_date"] = d["date_1"]
-        d["from_firm"] = d["mo"]
+    if _d["usl_ok"] == 2:
+        assert _d.get("naprlech", False), f'{_id}-ДС, нет Напаравления'
+        _d["npr_mo"] = f'{REGION}{_d["mo"]}'
+        _d["npr_date"] = _d["date_1"]
+        _d["from_firm"] = _d["mo"]
 
-def _naprav_hosp(id, d):
+def _naprav_hosp(_id: str, _d: dict):
     # hospital from self MO
-    if d.get("nsndhosp", None) is not None:
-        d["from_firm"] = d["mo"]
+    if _d.get("nsndhosp", None) is not None:
+        _d["from_firm"] = _d["mo"]
 
 
-def _diag(id, d):
+def _diag(_id: str, _d: dict):
     '''
         tal.d_type,
         tal.ds1,
@@ -254,41 +263,42 @@ def _diag(id, d):
         tal.char1 as c_zab,
     '''
 
-    assert d["ds1"], f'{id}-Нет DS1 (основной диагноз)'
-    if d["ds1"].upper().startswith('Z'):
-        d["c_zab"] = None
+    assert _d["ds1"], f'{_id}-Нет DS1 (основной диагноз)'
+    if _d["ds1"].upper().startswith('Z'):
+        _d["c_zab"] = None
     else:
-        assert d["c_zab"], f'{id}-Нет C_ZAB (характер основного заболевания)'
+        assert _d["c_zab"], f'{_id}-Нет C_ZAB (характер основного заболевания)'
 
 
-def _doct(id, d):
+def _doct(_id: str, _d: dict):
     """
         spec.prvs,
         spec.profil,
         doc.snils as iddokt,
     """
-    assert d["prvs"] and d["profil"], f'{id}-Нет PRVS | PROFIL (кода специальности по V021, профиля V002)'
-    assert d["iddokt"], f'{id}-Нет СНИЛС у доктора'
-    if d["prvs"] in USL_PRVS:
-        assert d["purp"] in USL_PURP, \
-            f'{id}-Для спец. {d["specfic"]}, prvs { d["prvs"] } неверная цель - {d["purp"]}'
+    assert _d["prvs"] and _d["profil"], \
+        f'{_id}-Нет PRVS | PROFIL (кода специальности по V021, профиля V002)'
+    assert _d["iddokt"], f'{_id}-Нет СНИЛС у доктора'
+    if _d["prvs"] in USL_PRVS:
+        assert _d["purp"] in USL_PURP, \
+            f'{_id}-Для спец. {_d["specfic"]}, prvs {_d["prvs"] } неверная цель - {_d["purp"]}'
 
     # right string may be in database
     #self.iddokt = self.iddokt.replace(" ", "-")
-    d["iddokt"] = _iddokt(d["idcase"], d["iddokt"])
+    _d["iddokt"] = _iddokt(_d["idcase"], _d["iddokt"])
 
     # 2020 FOMS 495 letter
-    if (d["prvs"] in USL_PRVS) and (d["for_pom"] != 2):
-        d["ishod"] = 4  # 304
-        d["rslt"] = 14  # 314
+    if (_d["prvs"] in USL_PRVS) and (_d["for_pom"] != 2):
+        _d["ishod"] = 4  # 304
+        _d["rslt"] = 14  # 314
 
-    if d["ishod"] < 100:
-        d["ishod"] += d["usl_ok"] * 100
-    if d["rslt"] < 100:
-        d["rslt"] += d["usl_ok"] * 100
+    if _d["ishod"] < 100:
+        _d["ishod"] += _d["usl_ok"] * 100
+    if _d["rslt"] < 100:
+        _d["rslt"] += _d["usl_ok"] * 100
 
 
-def _pacient(id, d):
+def _pacient(_id: str, _d: dict):
     '''
     -- PACIENT
         crd.fam,
@@ -304,37 +314,38 @@ def _pacient(id, d):
         crd.dul_org as docorg
     '''
 
-    assert d["fam"], f'{id}-Нет Фамилии пациента'
-    assert d["dr"], f'{id}-Нет дня рождения пациента'
-    if d["vpolis"] != 3:
+    assert _d["fam"], f'{_id}-Нет Фамилии пациента'
+    assert _d["dr"], f'{_id}-Нет дня рождения пациента'
+    if _d["vpolis"] != 3:
         #print(self.doctype, self.docser, self.docnum)
-        assert d["doctype"] and d["docnum"] and d["docser"], \
-            f'{id}-Тип полиса не ЕНП и неуказан полностью ДУЛ'
-        if d["smo_ok"] != SMO_OK:
-            assert d.get("docdate", None) and d.get("docorg", None), f'{id}-Инокраевой без даты и УФМС паспорта'
-        if d["doctype"] and d["doctype"] == 14: # pass RF
-            assert re.fullmatch('^\d\d \d\d$', d["docser"]), \
-                f'{id}-Серия паспрота не в формате 99 99: {d["docser"]}'
-            assert re.fullmatch('^\d{6}$', d["docnum"]), \
-                f'{id}-Номер паспорта не 6 цифр'
+        assert _d["doctype"] and _d["docnum"] and _d["docser"], \
+            f'{_id}-Тип полиса не ЕНП и неуказан полностью ДУЛ'
+        if _d["smo_ok"] != SMO_OK:
+            assert _d.get("docdate", None) and _d.get("docorg", None),\
+                f'{_id}-Инокраевой без даты и УФМС паспорта'
+        if _d["doctype"] and _d["doctype"] == 14: # pass RF
+            assert re.fullmatch(r'^\d\d \d\d$', _d["docser"]), \
+                f'{_id}-Серия паспрота не в формате 99 99: {_d["docser"]}'
+            assert re.fullmatch(r'^\d{6}$', _d["docnum"]), \
+                f'{_id}-Номер паспорта не 6 цифр'
 
     # local person no doc_date doc_org needed
-    if bool(d["smo"]):
-         d["docdate"], d["docorg"] = None, None
+    if bool(_d["smo"]):
+        _d["docdate"], _d["docorg"] = None, None
     # self.os_sluch= 2 if self.dost.find('1') > 0 else None
 
-def _d_type(id, d):
-    d["d_type"] = None
-    if d.get("ot", None) is None:
-        d["d_type"] = 5
+def _d_type(_id: str, _d: dict):
+    _d["d_type"] = None
+    if _d.get("ot", None) is None:
+        _d["d_type"] = 5
 
-def data_checker(data: dict, mo: int, napr_mo: int):# -> dict:
-
-    data["mo"] = mo # int(3) 228
+def data_checker(data: dict, this_mo: int, napr_mo: int):# -> dict:
+    """ data checker """
+    data["mo"] = this_mo # int(3) 228
     # in rec we have only from_firm
     data["npr_mo"] = napr_mo  # int(6) 250228 or None
     if data.get("mo_att", None) is None:
-        data["mo_att"] = mo
+        data["mo_att"] = this_mo
 
     fns = (
         _date,
@@ -350,4 +361,3 @@ def data_checker(data: dict, mo: int, napr_mo: int):# -> dict:
     )
     for func in fns:
         func(data["idcase"], data)
-

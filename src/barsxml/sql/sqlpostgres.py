@@ -2,6 +2,7 @@
 
 import psycopg2
 import psycopg2.extras
+#from psycopg2 import sql as psql
 from barsxml.sql.sqlbase import SqlBase
 from barsxml.config import postgresxml as pg
 
@@ -13,7 +14,6 @@ class SqlProvider(SqlBase):
         """ init """
         super().__init__(config, mo_code, year, month)
         dbc =  getattr(config, 'SQL_SRV', {})
-        self.schema = dbc.get('schema', 'public')
         try:
             self._db = psycopg2.connect(
                 port=dbc.get('port', 5432),
@@ -30,18 +30,23 @@ class SqlProvider(SqlBase):
         self.qurs = self._db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
         self.qurs1 = self._db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
 
+        self.cuser = dbc.get('cuser', None) or dbc['user']
         self.usl = {}
         self.spec_usl = {}
         self.mo_local={}
-        self.init_session()
+        self.init_session(dbc)
         self.get_local_mo()
         self.truncate_errors()
         self.talon_tbl = f'{pg.TALONZ_CLIN}{self.ye_ar}'
         self.para_tbl = f'{pg.PARA_CLIN}{self.ye_ar}'
 
-    def init_session(self):
+    def init_session(self, dbc: dict):
         """ set default search path to """
-        self.qurs.execute(pg.SET_SCHEMA, (self.schema,))
+        self.qurs.execute(pg.SET_SCHEMA % dbc.get('schema', 'public'))
+        if dbc.get('role', None):
+            self.qurs.execute(pg.SET_ROLE % dbc['role'])
+        self.qurs.execute(pg.SET_CUSER, (self.cuser,))
+        #self._db.commit()
 
     def truncate_errors(self):
         self.qurs1.execute(pg.TRUNCATE_ERRORS)
@@ -97,7 +102,7 @@ class SqlProvider(SqlBase):
         return [self.rec_to_dict(usl)]
 
     def set_error(self, idcase, card, error):
-        self.qurs1.execute(pg.SET_ERROR, (idcase, card, error))
+        self.qurs1.execute(pg.SET_ERROR, (idcase, card, error, self.cuser))
 
     def mark_as_sent(self, idcase):
         #UPDATE talonz_clin_%s SET talon_type=2 WHERE tal_num=%s
