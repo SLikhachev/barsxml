@@ -7,9 +7,12 @@ class SqlBase(ABC):
     def __init__(self, config: object, mo_code: str, year: str, month: str):
         self.config = config
         self.mo_code = mo_code  # full code 250747
-        self.year = int(year)
+        self.year= int(year)
         self.month = int(month)
-        self.ye_ar = self.year - 2000 # last 2 digits
+        if self.year > 99:
+            self.ye_ar = self.year - 2000 # last 2 digits
+        else:
+            self.ye_ar = self.year
 
     @abstractmethod
     def get_hpm_data(self, pack_type: str, get_fresh: bool):# -> object:
@@ -75,6 +78,7 @@ class SqlBase(ABC):
         """ mark as sent """
 
     def check_covid(self, *args):
+        """ pass """
         return False
 
     @abstractmethod
@@ -82,5 +86,5 @@ class SqlBase(ABC):
         """ truncate """
 
     @abstractmethod
-    def close(self, _rc):
+    def close(self):
         """ close """

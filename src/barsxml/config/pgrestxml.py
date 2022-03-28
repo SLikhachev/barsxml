@@ -1,6 +1,6 @@
 
 
-SQL = "pgrest"
+SQL_PROVIDER = "pgrest"
 
 TALONZ_TBL = 'talonz_clin_'
 PARA_TBL = 'para_clin_'

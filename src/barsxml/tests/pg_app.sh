@@ -1,0 +1,1 @@
+pytest -s test_pg_app.py

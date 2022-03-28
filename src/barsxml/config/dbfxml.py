@@ -1,5 +1,5 @@
 
-SQL = "dbf"
+SQL_PROVIDER = "dbf"
 
 COUNT_OMS ='SELECT COUNT(*) FROM %s WHERE ist_fin=1'
 """
@@ -75,22 +75,22 @@ I_TYPE -- NUMERIC 3
 """
 
 GET_RRS="""
-SELECT 
+SELECT
     nusl AS idcase,
     nusl AS n_zap,
     nusl AS nhistory,
     card,
-    fam, 
+    fam,
     imya AS im,
     otch AS ot,
     pol,
     date_birth AS dr,
-    
+
     c_insur,
     p_ser AS spolis,
     p_num AS npolis,
     p_num AS id_pac,
-   
+
     from_firm,
     purp,
 
@@ -99,54 +99,54 @@ SELECT
     date_in AS date_1,
     date_out AS date_2,
     code_mes AS n_ksg,
-    
+
     ds_clin AS ds1,
     ds2,
     char_main AS c_zab,
-    
-    visit_pol, 
+
+    visit_pol,
     visit_hom,
     visit_ds,
     visit_hs,
-  
+
     nsndhosp,
     type_hosp,
-    specfic, 
+    specfic,
     docfic,
     type_pay,
     d_type,
 
-    smo, 
+    smo,
     npr_mo,
-    
+
     prvs,
     iddokt,
     vpolis,
-    
+
     os_sluch,
     profil,
     det,
     vidpom,
     usl_ok,
-    ishod,  
+    ishod,
     rslt,
-   
+
     doctype,
     docser,
     docnum,
     '' AS docdate,
     '' AS docorg,
     snils AS prof_k,
-        
+
     okato_oms AS smo_ok,
     vnov_d AS mek,
     for_pom,
     ds3 as naprlech,
     vnov_m AS idsp,
     code_mes2 AS podr,
-   
+
     dost,
-    
+
     mr AS sum_m,
     mr AS sumv
 FROM %s WHERE
@@ -154,14 +154,14 @@ FROM %s WHERE
     i_type=%s
 """
 
-ONKO= """ds_clin LIKE 'D0%%' OR ds_clin LIKE 'D45%%' OR ds_clin LIKE 'D46%%' 
+ONKO= """ds_clin LIKE 'D0%%' OR ds_clin LIKE 'D45%%' OR ds_clin LIKE 'D46%%'
  OR ds_clin LIKE 'D47%%' OR ds_clin LIKE 'C%%';"""
 
 GET_RPS = """
 SELECT
     date_in AS date_usl,
     date_p AS date_out,
-    kol_usl, 
+    kol_usl,
     prvs,
     profil,
     iddokt AS code_md,
@@ -173,10 +173,10 @@ FROM %s WHERE nusl = ?
 
 GET_ALL_RPS = """
 SELECT
-    nusl, 
+    nusl,
     date_in AS date_usl,
     date_p AS date_out,
-    kol_usl, 
+    kol_usl,
     prvs,
     profil,
     iddokt AS code_md,
@@ -192,15 +192,15 @@ SELECT
     tal.open_date as date_usl,
     prof.one_visit as code_usl1,
     prof.two_visit as code_usl2,
-    1 as kol_usl, 
-    prof.podr as podr, 
+    1 as kol_usl,
+    prof.podr as podr,
     tal.doc_spec as spec,
     tal.doc_code as doc
 FROM
     talonz_clin_%s as tal, profil as prof, spec_prvs_profil as spp
-WHERE 
+WHERE
     tal.doc_spec = spp.spec AND
-    prof.id = spp.profil AND 
+    prof.id = spp.profil AND
     tal.tal_num=%s
 """
 

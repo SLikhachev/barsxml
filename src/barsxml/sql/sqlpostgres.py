@@ -34,11 +34,11 @@ class SqlProvider(SqlBase):
         self.usl = {}
         self.spec_usl = {}
         self.mo_local={}
-        self.init_session(dbc)
-        self.get_local_mo()
-        self.truncate_errors()
+        self.errors_table = getattr(config, 'errors_table', pg.ERRORS_TABLE_NAME)
         self.talon_tbl = f'{pg.TALONZ_CLIN}{self.ye_ar}'
         self.para_tbl = f'{pg.PARA_CLIN}{self.ye_ar}'
+        self.init_session(dbc)
+        self.get_local_mo()
 
     def init_session(self, dbc: dict):
         """ set default search path to """
@@ -46,10 +46,10 @@ class SqlProvider(SqlBase):
         if dbc.get('role', None):
             self.qurs.execute(pg.SET_ROLE % dbc['role'])
         self.qurs.execute(pg.SET_CUSER, (self.cuser,))
-        #self._db.commit()
+        self.truncate_errors()
 
     def truncate_errors(self):
-        self.qurs1.execute(pg.TRUNCATE_ERRORS)
+        self.qurs1.execute(pg.TRUNCATE_ERRORS % self.errors_table)
         self._db.commit()
 
     def get_local_mo(self):
