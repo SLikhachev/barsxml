@@ -8,5 +8,5 @@ dist/
 .idea/
 *.txt
 *.komodoproject
-
+!requirements.txt
 
