@@ -21,6 +21,6 @@ setup(name='barsxml',
         where = 'src',
         exclude=['barsxml.tests']
     ),
-    install_requires=['psycopg2 >= 2.7.3.2'],
+    install_requires=['psycopg2-binary >= 2.7.3.2'],
     zip_safe=False
 )
