@@ -13,8 +13,9 @@ def test_app():
     config = importlib.import_module('barsxml.tests.xml_pg_config')
 
     path = config.tests_dir
-    print(f'test path: {path}')
-    for folder in path.parts[-3:]:
+    data_path = config.BASE_XML_DIR / config.PACK
+    print(f'test path: {data_path.parts}')
+    for folder in data_path.parts[-3:]:
         path = path / folder
         if not Path.exists(path):
             Path.mkdir(path)
