@@ -12,13 +12,12 @@ def test_app():
     time1 = datetime.now()
     config = importlib.import_module('barsxml.tests.xml_pg_config')
 
-    if not Path.exists(config.BASE_XML_DIR):
-        Path.mkdir(config.BASE_XML_DIR)
+    path = config.tests_dir
 
-    pack = config.BASE_XML_DIR / config.PACK
-
-    if not Path.exists(pack):
-        Path.mkdir(pack)
+    for folder in path.parts[-3:]:
+        path = path / folder
+        if not Path.exists(path):
+            Path.mkdir(path)
 
     xml = BarsXml(config, config.PACK, config.MO_CODE, config.MONTH, 1)
     _rc, _pc, zname, errors = xml.make_xml(False, False, False)
