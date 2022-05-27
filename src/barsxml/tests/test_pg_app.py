@@ -13,7 +13,7 @@ def test_app():
     config = importlib.import_module('barsxml.tests.xml_pg_config')
 
     path = config.tests_dir
-
+    print(f'test path: {path}')
     for folder in path.parts[-3:]:
         path = path / folder
         if not Path.exists(path):
