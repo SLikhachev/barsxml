@@ -14,6 +14,7 @@ class SqlProvider(SqlBase):
         """ init """
         super().__init__(config, mo_code, year, month)
         dbc =  getattr(config, 'SQL_SRV', {})
+        print(f'{dbc["dbname"]} {dbc["user"]} {dbc["password"]}')
         try:
             self._db = psycopg2.connect(
                 port=dbc.get('port', 5432),
