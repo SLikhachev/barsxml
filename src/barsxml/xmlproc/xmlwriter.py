@@ -7,7 +7,7 @@ from pathlib import Path
 from tempfile import SpooledTemporaryFile as tmpf
 #from tempfile import TemporaryFile as tmpf
 from tempfile import TemporaryDirectory
-import xml.etree.cElementTree as ET
+import xml.etree.ElementTree as ET
 from barsxml.xmlmix.maketags import XmlTreeMaker
 from barsxml.xmlstruct.hmxml import HmStruct as hmNS
 from barsxml.xmlstruct.pmxml import PmStruct as pmNS
@@ -68,19 +68,26 @@ class XmlWriter:
 
             ET.ElementTree(
                 self.xml.make_tree(hdr_ns, cns.ZGLV, self.hdr)
-            ).write(hdr_file, encoding="unicode")
+            ).write(hdr_file,
+                xml_declaration=False,
+                method='xml',
+                encoding="unicode")
             hdr_file.write('\n')
 
             if hasattr(cns, 'SCHET'):
                 ET.ElementTree(
                     self.xml.make_tree(hdr_ns, cns.SCHET, self.hdr)
-                ).write(hdr_file, encoding="unicode")
+                ).write(hdr_file,
+                    xml_declaration=False,
+                    method='xml',
+                    encoding="unicode")
                 hdr_file.write('\n')
 
             # flush tmp file body
             body_file = self.ns_files[ns_idx]
             body_file.seek(0)
             for line in body_file:
+                #print(line)
                 hdr_file.write(line)
             body_file.close()
             hdr_file.write(self.hdr["end_tag"])
@@ -99,7 +106,10 @@ class XmlWriter:
             file = self.ns_files[idx]
             ET.ElementTree(
                 self.xml.make_tree(cns, self.NsTags[idx], data)
-            ).write(file, encoding="unicode")
+            ).write(file,
+                xml_declaration=False,
+                method='xml',
+                encoding="unicode")
             file.write('\n')
 
     def make_zip(self, rcnt):

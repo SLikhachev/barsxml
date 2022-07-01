@@ -1,13 +1,16 @@
+"""  doc """
 
-
-from barsxml.xmlproc.datadict import DataDict
-import xml.etree.cElementTree as ET
+#import xml.etree.cElementTree as ET
+import xml.etree.ElementTree as ET
+#from barsxml.xmlproc.datadict import DataDict
 from barsxml.xmlstruct.hmxml import HmStruct as hmNS
 from barsxml.xmlstruct.pmxml import PmStruct as pmNS
 from barsxml.xmlstruct.lmxml import LmStruct as lmNS
 
 
 class TagError(Exception):
+    """ doc """
+
     def __init__(self, msg, original_exception):
         super(TagError, self).__init__(f'{msg}: ({original_exception})')
         self.original_exception = original_exception
@@ -22,11 +25,11 @@ class XmlTreeMaker:
         else:
             raise AttributeError("No such attribute: " + name)
     '''
-    __slots__ = ('mo_code', 'mo', 'lpu', 'xns', 'const', 'countable', 'count')
+    __slots__ = ('mo_code', '_mo', 'lpu', 'xns', 'const', 'countable', 'count')
 
-    def __init__(self, mo_code: str, mo: str):
+    def __init__(self, mo_code: str, _mo: str):
         self.mo_code = mo_code  # string(6) digits
-        self.mo = mo  # string(3) last 3 digits
+        self._mo = _mo  # string(3) last 3 digits
         self.lpu = mo_code
         self.xns = {'hm': hmNS, 'pm': pmNS, 'lm': lmNS}
         self.const = {}
@@ -35,6 +38,7 @@ class XmlTreeMaker:
         self.init_const_count()
 
     def init_const_count(self):
+        """ doc """
         for ns_name, ns_obj in self.xns.items():
 
             # init const tags dict
@@ -49,6 +53,7 @@ class XmlTreeMaker:
                 self.countable[ns_name] = count
 
     def next_item(self, cns: str, tag: str):
+        """ doc """
         if self.count.get(cns, None) is None:
             return None
         if self.count[cns].get(tag, None) is None:
@@ -59,11 +64,13 @@ class XmlTreeMaker:
         return self.count[cns][tag]
 
     def next_init(self, cns: str, tag: str):
+        """ doc """
         tcount = self.countable[cns].get(tag, None)
         if tcount:
             self.count[cns][tcount] = 0
 
     def nxt_el(self, tag: str, val: any):
+        """ doc """
         if val is None or len(str(val)) == 0:
             return None
         _el = ET.Element(tag.upper())
@@ -145,5 +152,6 @@ class XmlTreeMaker:
         return proot
 
     def make_list(self, cns: str, tag: tuple, elems: list):
+        """doc """
         self.next_init(cns, tag[0])
         return [self.make_tree(cns, tag, el) for el in elems]
