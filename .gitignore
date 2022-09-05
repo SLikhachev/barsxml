@@ -9,4 +9,4 @@ dist/
 *.txt
 *.komodoproject
 !requirements.txt
-
+*.ini
