@@ -1,11 +1,12 @@
 
-# day stac
+# day stacionar
 DS = dict(
     p_per = 1,
     podr = 971,
     profil_k= 71
 )
 
+#
 KSG = dict(
     ver_ksg = "2021",
     ksg_pg = 1,

@@ -1,4 +1,6 @@
-
+""" XML nodes definition for PM file,
+    struct of def discribed in hmxml.py of this pack
+"""
 
 from types import SimpleNamespace as SN
 

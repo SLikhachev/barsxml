@@ -1,3 +1,7 @@
+""" XML nodes definition for LM file,
+    struct of def discribed in hmxml.py of this pack
+"""
+
 
 from types import SimpleNamespace as SN
 

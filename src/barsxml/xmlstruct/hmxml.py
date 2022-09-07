@@ -1,6 +1,61 @@
+""" XML nodes definition for HM (LM, PM) file(s)
+Nodes defines as:
 
+    NODE_TAG_NAME = ('TAG', (
+        'sub_node_1',
+        'sub_node_2',
+        ...
+        'composed_subnode_1', (
+            'sub_sub_node_1',
+            'sub_sub_node_2',
+            ...
+            composed_subnode_2, (
+                'sub_sub_sub_node_1',
+                'sub_sub_sub_node_2',
+                ...
+            )
+        )
+        sub_node_y
+        sub_mode_z
+    ))
+
+    Reqiured nodes must be presnt in, enumerates in
+    REQURED = ('reqired_node_1', 'required_node_2', ...)
+
+    Ignored nodes may be skipped, enumerates in
+    IGNORED = ('ignored_node_1', 'ignored_node_2', ...)
+
+    Nodes with constatnt text values enumerates as:
+    CONST={
+        'node_tag_1': 'node_value_1',
+        'node_tag_2': 'node_value_2',
+        ...
+    }
+
+    Countable nodes is a node of struct:
+    ....
+    <tag_name_1>
+        <count_tag_1>1</count_tag_1>
+        <sub_tag_1>...</sub_tag_1>
+        ...
+    </tag_name_1>
+    <tag_name_1>
+        <count_tag_1>1</count_tag_1>
+        <sub_tag_1>...</sub_tag_1>
+        ...
+    </tag_name_1>
+    ...
+
+    Countable tags definitions
+    COUNTABLE={
+        'tag_name_1':'count_tag_1',
+        'tag_name_2':'count_tag_2',
+        ....
+    }
+"""
 
 from types import SimpleNamespace as SN
+
 
 HmStruct = SN(
     ZGLV = ('ZGLV', (

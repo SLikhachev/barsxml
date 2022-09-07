@@ -1,3 +1,4 @@
+""" ODBC (DBF) SQL privider implementation """
 
 import pyodbc
 from barsxml.config.xmltype import TYPES
@@ -6,41 +7,43 @@ from barsxml.sql.sqlbase import SqlBase
 
 # DBF Sql PROVIDER
 class SqlProvider(SqlBase):
-    
-    def __init__(self, config, mo_code, year, month):
-        super().__init__(config, mo_code, year, month)
-        self.mo = mo_code[:3]
-        self.dbfn = f'{self.mo}{self.ye_ar[1]}{self.month}'
+    """ class """
+    def __init__(self, config):
+        super().__init__(config)
+        self.dbfn = f'{config._mo}{str(config.ye_ar[1])}{config.month}'
         self.dbf_connect()
         self.usl = {}
 
     def dbf_connect(self):
-        self.db_dir = self.config.RR_DIR
+        """ method """
+        self.db_dir = self.cfg.sql.RR_DIR
         print("DBF dir ", self.db_dir)
         conns = "Driver={Microsoft dBASE Driver (*.dbf)};DefaultDir=%s" % self.db_dir
-        self.db = pyodbc.connect(conns, autocommit=True)
-        self.rr = f'RR{self.dbfn}.dbf'
-        self.rp = f'RP{self.dbfn}.dbf'
-        self.rs = f'RS{self.dbfn}.dbf'
-        self.curs = self.db.cursor()
+        self._db = pyodbc.connect(conns, autocommit=True)
+        self._rr = f'RR{self.dbfn}.dbf'
+        self._rp = f'RP{self.dbfn}.dbf'
+        self._rs = f'RS{self.dbfn}.dbf'
+        self.curs = self._db.cursor()
         return self
 
     def truncate_errors(self):
         pass
-    
-    def get_hpm_data(self, type, get_fresh):
-        get_rrs = self.config.GET_RRS % (self.rr, TYPES[type])
+
+    def get_hpm_data(self, get_fresh):
+        get_rrs = self.cfg.sql.GET_RRS % (self._rr, TYPES[self.cfg.pack_type])
         return self.curs.execute(get_rrs).fetchall()
 
     def get_npr_mo(self, data):
         return getattr(data, 'npr_mo', None)
-            
+
     def get_usl(self, data):
-        get_rps = self.config.GET_RPS % self.rp
+        """ method """
+        get_rps = self.cfg.sql.GET_RPS % self._rp
         return self.curs.execute(get_rps, (data.idcase,)).fetchall()
 
     def get_all_usl(self):
-        get_rps = self.config.GET_ALL_RPS % self.rp
+        """ method """
+        get_rps = self.cfg.sql.GET_ALL_RPS % self._rp
         # curs = self.db.cursor()
         for rps in self.curs.execute(get_rps).fetchall():
             if self.usl.get(rps.nusl, None) is None:
@@ -49,20 +52,21 @@ class SqlProvider(SqlBase):
             self.usl[rps.nusl].append(rps)
 
     def get_all_usp(self):
+        """ method """
         return None
 
     def get_pmu_usl(self, idcase):
         return self.usl.get(idcase, [])
 
-    def get_spec_usl(self, data):
+    def get_spec_usl(self, profil):
         return None
-    
+
     def set_error(self, idcase, card, error):
         pass
-    
-    def mark_as_sent(self, data):
+
+    def mark_as_sent(self, idcase):
         pass
 
     def close(self):
         self.curs.close()
-        self.db.close()
+        self._db.close()

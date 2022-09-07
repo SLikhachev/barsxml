@@ -1,7 +1,9 @@
+""" Obsolete settings for old DBF (ODBC driver) reports files, unused now """
 
 SQL_PROVIDER = "dbf"
 
 COUNT_OMS ='SELECT COUNT(*) FROM %s WHERE ist_fin=1'
+# Struct of the peports's record
 """
 NUSL	-- NUMERIC 8
 CARD	-- NUMERIC 8
@@ -73,7 +75,7 @@ DOST_P -- NUMERIC 1
 MR -- CHAR 100
 I_TYPE -- NUMERIC 3
 """
-
+# SQL stmnt for select data from DB records
 GET_RRS="""
 SELECT
     nusl AS idcase,
@@ -153,10 +155,11 @@ FROM %s WHERE
     ist_fin=1 AND
     i_type=%s
 """
-
+# select oncology records
 ONKO= """ds_clin LIKE 'D0%%' OR ds_clin LIKE 'D45%%' OR ds_clin LIKE 'D46%%'
  OR ds_clin LIKE 'D47%%' OR ds_clin LIKE 'C%%';"""
 
+# select paraclinic records with idcase
 GET_RPS = """
 SELECT
     date_in AS date_usl,
@@ -170,7 +173,7 @@ SELECT
     '0'AS sumv_usl
 FROM %s WHERE nusl = ?
 """
-
+# select all paraclinic records
 GET_ALL_RPS = """
 SELECT
     nusl,
@@ -185,8 +188,7 @@ SELECT
     '0'AS sumv_usl
 FROM %s
 """
-
-
+# select doctors service
 get_spec_usl = """
 SELECT
     tal.open_date as date_usl,
@@ -203,9 +205,11 @@ WHERE
     prof.id = spp.profil AND
     tal.tal_num=%s
 """
-
+#
 get_stom = ''
 
+# insert errors records
 set_error="INSERT INTO error_pack(tal_num, crd_num, error) VALUES ( %s, %s, %s );"
 
+#
 truncate_errors="TRUNCATE TABLE error_pack;"

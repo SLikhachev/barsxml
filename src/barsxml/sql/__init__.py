@@ -3,6 +3,5 @@
 import importlib
 
 def get_sql_provider(config):
-    """ import """
-    #print('SQL %s ' % config.SQL)
+    """ import settings from barsxml/sql/sql...py module """
     return importlib.import_module(f'barsxml.sql.sql{config.SQL_PROVIDER}')

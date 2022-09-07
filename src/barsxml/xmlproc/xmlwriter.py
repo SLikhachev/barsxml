@@ -1,7 +1,8 @@
-""" XmlWRiter class definition"""
+""" XmlWRiter class definition """
 
 import os
 import shutil
+from typing import Tuple
 from time import time
 from pathlib import Path
 from tempfile import SpooledTemporaryFile as tmpf
@@ -18,9 +19,18 @@ from barsxml.xmlproc.hdrdict import make_hm_hdr, make_pm_hdr, make_lm_hdr
 
 
 class XmlWriter:
-    """ calss XmlWriter """
+    """ calss XmlWriter
+        writes xml files successively HM -> PM -> LM from one data record
+        then from next data record, no concurrency or muliprocrssing applied
+    """
+
+    #namespaces
     Ns = ('hm', 'pm', 'lm')
+
+    # main xml root node for each NS
     NsTags = (hmNS.ZAP, pmNS.SLUCH, lmNS.PERS)
+
+    # namespaces for file headers
     HdrNsFn = (
         (make_hm_hdr, hmNS),
         (make_pm_hdr, pmNS),
@@ -35,17 +45,20 @@ class XmlWriter:
         self.check = True
         self.ns_files = []
 
-        self.xml = XmlTreeMaker(cfg.mo_code, cfg.mo)
+        # init tree maker
+        self.xml = XmlTreeMaker(cfg.mo_code, cfg.short_mo)
 
         error_file_name = cfg.xmldir / \
             f"errors_{cfg.pack_type}{str(time())[10:14]}.txt"
         self.error_fd = open(error_file_name, "w", encoding='utf-8')
 
     def init_files(self, check: bool):
-        """ opens tmp files for write report """
+        """ opens tmp files for report write """
         self.check = check
         if check:
             return
+
+        # list of 3 tmp files desciptors
         self.ns_files = [tmpf(mode="r+", encoding="1251") for _ in self.Ns]
 
     def write_error(self, error: str):
@@ -53,7 +66,7 @@ class XmlWriter:
         self.error_fd.write(error)
 
     def write_hdr_body(self, tmpdir: TemporaryDirectory, hdr_ns: str):
-        """ write hdr body to file """
+        """ hdr body to file """
         ns_idx = self.Ns.index(hdr_ns)
         make_hdr_fn, cns = self.HdrNsFn[ns_idx]
 
@@ -95,7 +108,7 @@ class XmlWriter:
         return _fname
 
     def write_data(self, data):
-        """ write data to file """
+        """ main data records to temp files """
         #add person to set
         pers = data.get_pers()
         if self.check:
@@ -105,6 +118,7 @@ class XmlWriter:
                 continue
             file = self.ns_files[idx]
             ET.ElementTree(
+                # make tree with root node from current namespace
                 self.xml.make_tree(cns, self.NsTags[idx], data)
             ).write(file,
                 xml_declaration=False,
@@ -128,8 +142,8 @@ class XmlWriter:
 
             shutil.make_archive(str(base_name), 'zip', tmpdir)
 
-    def close(self, rcnt: int, pers: int, errors: int):
-        """ close open files """
+    def close(self, rcnt: int, pers: int, errors: int) -> Tuple[int, int, str, int]:
+        """ close openened files """
         if not self.error_fd.closed:
             self.error_fd.close()
             if errors == 0:
@@ -144,4 +158,5 @@ class XmlWriter:
         if len(str(self.zfile_name)) > 0:
             zipname = self.xmldir / f'{self.zfile_name}.zip'
 
+        # total HM records, LM records, ZIP name, errors find
         return rcnt, pers, str(zipname), errors

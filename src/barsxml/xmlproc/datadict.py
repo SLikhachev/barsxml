@@ -9,19 +9,18 @@ from barsxml.xmlprod.utils import USL_PURP, USL_PRVS, \
 
 
 class DataDict(UserDict):
-    """ class
-
+    """ class used for store the current DB record
     """
 
     __slots__ = ('data', 'mo_code', 'pers')
 
-    def __init__(self, mo_code):
+    def __init__(self, mo_code: str):
         super().__init__()
         self.mo_code = mo_code
         self.pers = set()
 
     def next_rec(self, data: dict):
-        """ flush data """
+        """ next data dict overwrite current self """
         self.data = data
 
     def pm_data_attrs(self):
@@ -39,12 +38,14 @@ class DataDict(UserDict):
         """ calculate ZAP fields
             self: dict
         """
+
+        # full visits value
         _visits: int = self["visit_pol"] + self["visit_hom"]
 
         def _os_sluch():
             return ("os_sluch", None if bool(self["ot"]) else 2)
 
-        def __idsp():  # -> int
+        def __idsp() -> int:
             # neotl
             if self["for_pom"] == 2:
                 return 29
@@ -166,10 +167,7 @@ class DataDict(UserDict):
             return self
 
         def _pol():
-            try:
-                return ('w', ['м', 'ж'].index(self.get("pol", '').lower()) + 1)
-            except Exception:
-                return ('w', 0)
+            return ('w', ['м', 'ж'].index(self.get("pol", 'м').lower()) + 1)
 
         def _dost():
             _dost = []

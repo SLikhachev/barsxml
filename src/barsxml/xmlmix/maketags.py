@@ -1,15 +1,19 @@
-"""  doc """
+""" Definition of the xml tree maker
+    walks trough xml file definitons at xmlstruct pack/hm(lm, pm)struct.py NS
+    and makes the xml tree, which then writes to the tmp files
+    tags values get from dict which keys identical with tags names in the NS
+"""
 
-#import xml.etree.cElementTree as ET
+from typing import List
+from collections import defaultdict
 import xml.etree.ElementTree as ET
-#from barsxml.xmlproc.datadict import DataDict
 from barsxml.xmlstruct.hmxml import HmStruct as hmNS
 from barsxml.xmlstruct.pmxml import PmStruct as pmNS
 from barsxml.xmlstruct.lmxml import LmStruct as lmNS
 
 
 class TagError(Exception):
-    """ doc """
+    """ custom exc """
 
     def __init__(self, msg, original_exception):
         super(TagError, self).__init__(f'{msg}: ({original_exception})')
@@ -25,81 +29,110 @@ class XmlTreeMaker:
         else:
             raise AttributeError("No such attribute: " + name)
     '''
+
+    # self attributes for some xml tags: 'lpu', 'mo_code'
     __slots__ = ('mo_code', '_mo', 'lpu', 'xns', 'const', 'countable', 'count')
 
     def __init__(self, mo_code: str, _mo: str):
         self.mo_code = mo_code  # string(6) digits
         self._mo = _mo  # string(3) last 3 digits
         self.lpu = mo_code
-        self.xns = {'hm': hmNS, 'pm': pmNS, 'lm': lmNS}
-        self.const = {}
-        self.countable = {}
-        self.count = {}
-        self.init_const_count()
 
-    def init_const_count(self):
-        """ doc """
+        # namespaces def as dict, we need all three refs
+        # case of xml files writes successively, no need three different classes
+        self.xns = {'hm': hmNS, 'pm': pmNS, 'lm': lmNS}
+
+        # const tags just dict(ns=dict(tag=value))
+        self.const = {}
+
+        # countable tags just dict(ns=dict(node_tag=count_tag))
+        self.countable = {}
+
+        # count values just dict(ns=dict(tag=value))
+        self.count = {}
+
+        self.init_const_and_count()
+
+
+    def init_const_and_count(self):
+        """ select const and countable tags from NSs, then fill the self state dicts"""
         for ns_name, ns_obj in self.xns.items():
 
-            # init const tags dict
+            # init const tags dict( namespace: const_dict )
             const = getattr(ns_obj, 'CONST', None)
             if const and isinstance(const, dict):
                 self.const[ns_name] = const
 
-            # init count tags dict
+            # init count tags dict( namespace: count_dict )
             count = getattr(ns_obj, 'COUNTABLE', None)
             if count and isinstance(count, dict):
-                self.count[ns_name] = {}
+                self.count[ns_name] = defaultdict(int)
                 self.countable[ns_name] = count
 
-    def next_item(self, cns: str, tag: str):
-        """ doc """
+
+    def next_countable_item(self, cns: str, tag: str) -> int or None:
+        """ produce next countable tag if any, workaround with simple dicts
+            dont use complex datatypes (descriptors, classes, generators, ...)
+            @param: cns - current namespace
+            @param: tag - tag name
+
+            return None or int
+        """
+        # Dont have countable tags in namespace
         if self.count.get(cns, None) is None:
             return None
+
+        # Dont countable tag
         if self.count[cns].get(tag, None) is None:
             return None
-        if (self.count.get(cns, None) or self.count[cns].get(tag, None)) is None:
-            return None
+
+        # increment tag value
         self.count[cns][tag] += 1
         return self.count[cns][tag]
 
-    def next_init(self, cns: str, tag: str):
-        """ doc """
-        tcount = self.countable[cns].get(tag, None)
-        if tcount:
-            self.count[cns][tcount] = 0
 
-    def nxt_el(self, tag: str, val: any):
-        """ doc """
+    def next_countable_init(self, cns: str, tag: str):
+        """ reset countable tag value """
+        tag_count = self.countable[cns].get(tag, None)
+        if tag_count:
+            self.count[cns][tag_count] = 0
+
+
+    def nxt_el(self, tag: str, val: any) -> ET.Element or None:
+        """ produce next xml element node """
         if val is None or len(str(val)) == 0:
             return None
         _el = ET.Element(tag.upper())
-        _el.text = f'{val}'
+        _el.text = f'{val}' # value to string
         return _el
 
-    def leaf_els(self, cns: str, tag: any, data: dict):
-        """ cns current namespace
-            tag current tag
-            data current UserDict
-        """
-        # if tree (root: string, body: tuple)
-        if isinstance(tag, tuple):
 
-            # data dict has list - {tag: list(items)}
+    def leaf_els(self, cns: str, tag: any, data: dict) -> List[ET.Element] or None:
+        """ main func analyze tag param with current name space and data
+            @param: cns - current name space
+            @param: tag - current tag: string | tuple(string, tuple)
+            @param: data - current data dict
+
+            return None if tag ignored else List[ET.Element]
+        """
+        # check if tree (root: string, body: tuple)
+        if isinstance(tag, tuple):
             assert isinstance(tag[0], str), f"Неверная структра элемента {tag}"
+
+            # get value from the dict
             value = data.get(tag[0].lower(), None)
 
-            # print(f'{tag[0]}={value}')
-
-            # if must be dropped, enclosed trees should be present as empty list in data
+            # may be data dict has list - {tag: list(items)}
+            # if this tag must be dropped,
+            # enclosed trees should be present as empty list in data
             if isinstance(value, list):
                 if len(value) > 0:
-                    # return an [ET.Element]
+                    # return a List[ET.Element]
                     return self.make_list(cns, tag, value)
                 # drop this tree
                 return None
 
-            # return single tree el
+            # return single ET.Element tail recursive call
             return [self.make_tree(cns, tag, data)]
 
         # simple tag
@@ -107,15 +140,23 @@ class XmlTreeMaker:
         if tag in self.xns[cns].IGNORED:
             return None
 
-        # get value from data dict or self.attrs or NS CONST or COUNT
+        # get value from data dict
         val = data.get(tag, None)
-        if val is None:
-            val = getattr(self, tag, None)
-            if val is None:
-                val = self.const[cns].get(tag, None)
-                if val is None:
-                    val = self.next_item(cns, tag)
 
+        # apply simple imperative logic
+        if val is None:
+            # or self.attrs
+            val = getattr(self, tag, None)
+
+            if val is None:
+                # or NS.CONST
+                val = self.const[cns].get(tag, None)
+
+                if val is None:
+                    # is a countable tag
+                    val = self.next_countable_item(cns, tag)
+
+        # value for tag not found is tag reqired ?
         if val is None:
             if tag in self.xns[cns].REQUIRED:
                 raise AttributeError(
@@ -129,10 +170,13 @@ class XmlTreeMaker:
         # simple text tag
         return [self.nxt_el(tag, val)]
 
-    def make_tree(self, cns: str, tree: tuple, data: dict):
-        """ Start make Xml Tree
-            tags must be tuple always
-            (root: string, body: tuple)
+
+    def make_tree(self, cns: str, tree: tuple, data: dict) -> ET.Element:
+        """ Start point to make Xml Tree
+            @params: cns - current namespace ('hm', 'lm', 'pm')
+            @param: tree - must be tuple always (root: string, body: tuple)
+            @param: data - dict which keys may be identical with tag names
+
         """
         root, body = tree
         proot = ET.Element(root.upper())
@@ -146,12 +190,18 @@ class XmlTreeMaker:
                         proot.append(_el)
             except Exception as _e:
                 raise TagError(
-                    f'{data["idcase"]}-Ошибка формиривания: TagError::  root: {root}, tag: {tag}, el: {_el}',
-                    _e) from _e
+                f'{data["idcase"]}-Ошибка формиривания: TagError::  root: {root}, tag: {tag}, el: {_el}',
+                _e
+                ) from _e
 
         return proot
 
-    def make_list(self, cns: str, tag: tuple, elems: list):
-        """doc """
-        self.next_init(cns, tag[0])
+
+    def make_list(self, cns: str, tag: tuple, elems: list) -> List[ET.Element]:
+        """ produce list of xml element nodes """
+
+        # if tag is countable, reset
+        self.next_countable_init(cns, tag[0])
+
+        # make
         return [self.make_tree(cns, tag, el) for el in elems]

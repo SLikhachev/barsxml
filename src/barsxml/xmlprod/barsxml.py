@@ -1,50 +1,59 @@
-""" main class definition """
+""" Bars MIS reporter class definition """
 
 # NO reason as for time consumption
 #from concurrent.futures import ThreadPoolExecutor, as_completed
 #from functools import reduce
+from typing import Tuple
 from barsxml.sql import get_sql_provider
 from barsxml.xmlproc.configx import ConfigAttrs
 from barsxml.xmlproc.xmlwriter import XmlWriter
 from barsxml.xmlproc.datadict import DataDict
+from .reporter import XmlReport
 
 
-class BarsXml:
-    """ Main container for process """
+class BarsXml(XmlReport):
+    """ Bars container for report """
+
+    __slots__ = ('cfg', 'data_dict', 'sql', 'xml_writer')
 
     def __init__(self, config: object, pack_type: str, mo_code: str, month: str, pack_num: int):
-        # init Configs
-        self.attrs = ConfigAttrs(config, pack_type, mo_code, month, pack_num)
+        """
+            @params: config: object(
+                SQL_PROVIDER=self.sql_provider, # String
+                SQL_SRV=self.sql_srv, # dict
+                YEAR = args['month'][0], #String
+                BASE_XML_DIR=self.catalog('BASE_XML_DIR'),)
+            @param: pack_type string of key for TYPES dict('type': int)
+            @param: mo_code - code of MO '250799'
+            @param: month - pack month '01'-'12'
+            @param: pack_num - sequential pack number
+        """
+        # sanityze and init Configs
+        self.cfg = ConfigAttrs(config, pack_type, mo_code, month, pack_num)
 
         # init UserDict
         self.data_dict = DataDict(mo_code=mo_code)
 
-        # init sql adapter dependency
-        self.sql = get_sql_provider(config).SqlProvider(
-            config, mo_code, self.attrs.year, month)
+        # init SQL adapter dependency
+        self.sql = get_sql_provider(config).SqlProvider(self.cfg)
 
-        # init xml writer objects
-        self.xml_writer = XmlWriter(self.attrs)
+        # init XML writer object
+        self.xml_writer = XmlWriter(self.cfg)
 
-    # -> tuple:
-    def make_xml(self, mark_sent: bool, get_fresh: bool, check=False):
+
+    def make_xml(self, mark_sent: bool, get_fresh: bool, check=False) -> Tuple[int, int, str, int]:
+        """ main class method
+            @param: mark_sent: bool if TRUE set records field talon_type = 2 else ignore
+            @param: get_fresh: bool if TRUE ignore already sent else get all records
+            @param: check: bool if TRUE -> check tables recs only, don't make xml pack
         """
-        mark_sent: bool if TRUE set records field talon_type = 2 else ignore
-        get_fresh: bool if TRUE ignore already sent and accepted records else get all records
-        check: bool if TRUE -> check tables recs only, don't make xml pack
-            """
 
         self.xml_writer.init_files(check)
         self.sql.get_all_usp()
         self.sql.get_all_usl()
-        rdata = self.sql.get_hpm_data(self.attrs.pack_type, get_fresh)
+        rdata = self.sql.get_hpm_data(get_fresh)
 
-        """
-        if len(rdata) == 0:
-            return self.sql.close()
-            #raise Exception("Length of the fetched sql data is zero ")
-            """
-
+        # total records, errors
         rcnt, errors = 0, 0
         for rdata_row in rdata:
             self.data_dict.next_rec(self.sql.rec_to_dict(rdata_row))
@@ -64,6 +73,7 @@ class BarsXml:
                 # print(rdata_row)
                 # print(self.sql.spec_usl)
                 #raise err
+                # write error to the file
                 self.xml_writer.write_error(f'{idcase}-{err}\n')
                 self.sql.set_error(idcase, card, str(err))
                 errors += 1
@@ -72,7 +82,6 @@ class BarsXml:
             # mark as sent
             if not check and mark_sent:
                 self.sql.mark_as_sent(idcase)
-            #rcnt += 1
 
         # end loop of all data
         # make ZIP archive

@@ -1,15 +1,23 @@
-""" module """
+""" settings for Posgresql DB native connection with psycopg2 """
+
 SQL_PROVIDER = "postgres"
 
-
+# names of the talons, paraclinic tables
 TALONZ_CLIN='talonz_clin_'
 PARA_CLIN='para_clin_'
 
+# current schema and role for authorized access
 SET_SCHEMA= "SET SCHEMA '%s';"
 SET_ROLE="SET ROLE '%s';"
-# for PG >= v14
+
+# Claim pg server's session variable
+
+# Stmnt for PG >= v14
 #SET_CUSER = "SET SESSION request.jwt.claims = '{"role": "webuser", "user": "jmoreva"}'"
+
+# Stmnt for PG < v14
 SET_CUSER='SET SESSION "request.jwt.claim.user" = %s;'
+
 
 #127.0.0.1:7000/rpc/get_hpm_data?tbl=talonz_clin_21&mont=4&fresh=0
 GET_HPM_DATA = 'SELECT * FROM get_hpm_data(%s, %s, %s)'
