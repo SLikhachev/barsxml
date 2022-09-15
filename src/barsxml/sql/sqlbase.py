@@ -1,18 +1,17 @@
 """ sql base class def """
 
 from abc import ABC, abstractmethod
-import re
 import barsxml.config as bcfg
 
+
 class SqlBase(ABC):
-    """ abc for RDBC access """
+    """ abc for RDBM access """
 
     def __init__(self, config: object):
         """
             @param: config where:
-                sql: object - sql provider definition
+                sql_srv: dict - sql srver to connect definition
                 pack_type: str - pack type
-
                 mo_code: str - full MO code e.g. '250747'
                 _mo: str - last 3 digit of mo_code
                 year: int - year of the report 2022

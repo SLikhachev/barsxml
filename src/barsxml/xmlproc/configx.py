@@ -8,13 +8,14 @@ from barsxml.config.xmltype import TYPES
 
 class ConfigAttrs:
     """ state object of common configs """
-    def __init__(self, config: object, pack_type: str, mo_code: str, month: str, pack_num: int):
+    def __init__(self, config: object,
+        pack_type: str, mo_code: str, month: str, pack_num: int):
         """
             @param: config - config object where
-                SQL_PROVIDER=self.sql_provider, # String
-                SQL_SRV=self.sql_srv, # dict
-                YEAR = args['month'][0], #String
-                BASE_XML_DIR=self.catalog('BASE_XML_DIR'),
+                SQL_PROVIDER, # String
+                sql_srv, # dict
+                year, #String
+                base_xml_dir
 
             @param: pack_type string of key for TYPES dict('type': int)
                 where int is first digit in two last one of 'Tn' in the pack name
@@ -35,8 +36,8 @@ class ConfigAttrs:
         """
 
         # write all sql (provider and connection dict) to sql attr
-        self.sql = config
-        self.xmldir = Path( str(config.BASE_XML_DIR) )
+        self.sql_srv = config.sql_srv
+        self.xmldir = Path( str(config.base_xml_dir) )
 
         assert pack_type in TYPES.keys(), f"Тип пакета {pack_type} не поддерживается"
         self.pack_type = pack_type  # string(3)
@@ -51,14 +52,14 @@ class ConfigAttrs:
             raise AttributeError(f"Код МО: {mo_code} не соответвует шаблону") from None
 
         try:
-            self.year = re.search(r'^\d{2,4}$', config.YEAR).group(0)
+            self.year = re.search(r'^\d{2,4}$', config.year).group(0)
             self.ye_ar= self.year
             if len(self.year) > 2:
                 self.ye_ar= self.year[-2:]
             self.ye_ar= int(self.ye_ar)
             self.year= 2000 + self.ye_ar
         except AttributeError:
-            raise AttributeError(f"Год отчета: {config.YEAR} указан неверно") from None
+            raise AttributeError(f"Год отчета: {config.year} указан неверно") from None
 
         try:
             self.int_month= min(

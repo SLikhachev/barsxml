@@ -19,10 +19,10 @@ class BarsXml(XmlReport):
     def __init__(self, config: object, pack_type: str, mo_code: str, month: str, pack_num: int):
         """
             @params: config: object(
-                SQL_PROVIDER=self.sql_provider, # String
-                SQL_SRV=self.sql_srv, # dict
-                YEAR = args['month'][0], #String
-                BASE_XML_DIR=self.catalog('BASE_XML_DIR'),)
+                SQL_PROVIDER, # String
+                sql_srv, # dict
+                year
+                base_xml_dir
             @param: pack_type string of key for TYPES dict('type': int)
             @param: mo_code - code of MO '250799'
             @param: month - pack month '01'-'12'

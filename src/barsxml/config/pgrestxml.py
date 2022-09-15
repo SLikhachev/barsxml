@@ -11,7 +11,7 @@ GET_ALL_LOCAL_MO = '/get_mo_local'
 GET_ALL_USL= '/rpc/get_pmu_usl'
 GET_SPEC_USL = '/get_spec_usl'
 
-MARK_WHERE = f'?tal_num=eq.%s'
+MARK_WHERE = "?tal_num=eq.%s"
 MARK_AS_SENT=dict(talon_type=2)
 
 SET_ERROR = "INSERT INTO error_pack(tal_num, crd_num, error) VALUES ( %s, %s, %s );"

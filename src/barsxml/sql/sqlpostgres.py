@@ -10,8 +10,8 @@ class SqlProvider(SqlBase):
     """ class impl """
 
     def __init__(self, config):
-        super().__init__(config)
-        dbc =  getattr(config.sql, 'SQL_SRV', {})
+        super().__init__(config) #self.cfg = config
+        dbc =  getattr(config, 'sql_srv', {})
         #print(f'{dbc["dbname"]} {dbc["user"]} {dbc["password"]}')
         try:
             self._db = psycopg2.connect(
@@ -33,7 +33,7 @@ class SqlProvider(SqlBase):
         self.usl = {}
         self.spec_usl = {}
         self.mo_local={}
-        self.errors_table = getattr(config.sql, 'errors_table', pg.ERRORS_TABLE_NAME)
+        self.errors_table = dbc.get('errors_table', pg.ERRORS_TABLE_NAME)
         self.talon_tbl = f'{pg.TALONZ_CLIN}{config.ye_ar}'
         self.para_tbl = f'{pg.PARA_CLIN}{config.ye_ar}'
         self.init_session(dbc)
@@ -46,9 +46,11 @@ class SqlProvider(SqlBase):
             self.qurs.execute(pg.SET_ROLE % dbc['role'])
         self.qurs.execute(pg.SET_CUSER, (self.cuser,))
         if self.errors_table != 'None':
-            self.truncate_errors()
+            pass
+            #self.truncate_errors()
 
     def truncate_errors(self):
+        print(self.errors_table)
         self.qurs1.execute(pg.TRUNCATE_ERRORS % self.errors_table)
         self._db.commit()
 

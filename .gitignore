@@ -1,5 +1,5 @@
 __pycache__/
-.pytest_cashe/
+.pytest_cache/
 .vscode/
 barsxml.egg-info/
 build/

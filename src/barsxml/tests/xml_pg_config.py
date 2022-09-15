@@ -5,7 +5,7 @@ from barsxml.path.thispath import Path
 from barsxml.config.postgresxml import *
 
 
-SQL_SRV = dict(
+sql_srv = dict(
     port=os.getenv('DB_PORT') or 5432,
     host=os.getenv('DB_HOST') or '127.0.0.1',
     dbname = os.getenv('DB_NAME') or 'hokuto',
@@ -18,9 +18,9 @@ SQL_SRV = dict(
 tests_dir = Path.script_dir()
 MO_CODE = "250796"
 PACK= os.getenv('TEST_PAC') or "app"
-YEAR = os.getenv('TEST_YEAR') or "2021"
+year = os.getenv('TEST_YEAR') or "2021"
 MONTH = os.getenv('TEST_MONTH') or "11"
-BASE_XML_DIR = tests_dir / 'data' / SQL_SRV['dbname']
+base_xml_dir = tests_dir / 'data' / sql_srv['dbname']
 
 DS = dict(
     p_per=1,
