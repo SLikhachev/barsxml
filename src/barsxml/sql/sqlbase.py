@@ -76,7 +76,7 @@ class SqlBase(ABC):
         return {'ds': _ds, 'ksg': ksg}
 
     @abstractmethod
-    def get_npr_mo(self, data: dict) -> int | None:
+    def get_npr_mo(self, data: dict) -> int:
         """ return npr_mo number (mo_code) """
 
     @abstractmethod
