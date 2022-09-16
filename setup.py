@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(name='barsxml',
     version='0.2.0',
-    url='https://github.com/SLikhachev/zomspa',
+    url='https://github.com/SLikhachev/barsxml',
     author='SLikhachev',
     author_email='polaughing@yahoo.com',
     license='BSD2',

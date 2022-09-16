@@ -4,16 +4,18 @@ import os
 from barsxml.path.thispath import Path
 from barsxml.config.postgresxml import *
 
-
 sql_srv = dict(
     port=os.getenv('DB_PORT') or 5432,
     host=os.getenv('DB_HOST') or '127.0.0.1',
-    dbname = os.getenv('DB_NAME') or 'hokuto',
+    dbname = os.getenv('DB_NAME') or '',
     user=os.getenv('DB_USER') or 'postgres',
-    password=os.getenv('DB_PASSWORD') or 'boruh',
+    password=os.getenv('DB_PASSWORD') or '',
     schema=os.getenv('DB_SCHEMA') or 'public',
     dbauth=os.getenv('DB_AUTH') or None
 )
+
+POSTGRES=sql_srv
+SQL_PROVIDER= 'postgres'
 
 tests_dir = Path.script_dir()
 MO_CODE = "250796"

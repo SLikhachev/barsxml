@@ -10,3 +10,4 @@ dist/
 *.komodoproject
 !requirements.txt
 *.ini
+!pytest_demo.ini
