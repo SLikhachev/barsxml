@@ -60,7 +60,7 @@ class ConfigAttrs:
             self.year= 2000 + self.ye_ar
         except AttributeError:
             raise AttributeError(f"Год отчета: {config.year} указан неверно") from None
-
+        # max.min excludes 0
         try:
             self.int_month= min(
                 int(re.search(r'^\d{1,2}$', month).group(0)),
@@ -72,6 +72,7 @@ class ConfigAttrs:
             raise AttributeError(f"Месяц отчета: {month} указан неверно") from None
 
         try:
-            self.pack_number = min(1, max(int(pack_num), 9))
+            # max.min excludes 0
+            self.pack_number = max(1, min(abs(int(pack_num)), 9))
         except ValueError:
             raise ValueError(f"Неверный номер пакета: {pack_num}") from None
