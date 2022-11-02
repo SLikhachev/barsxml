@@ -7,7 +7,7 @@ from barsxml.config.xmltype import TYPES
 
 
 class ConfigAttrs:
-    """ state object of common configs """
+    """ state object of the common configs """
     def __init__(self, config: object,
         pack_type: str, mo_code: str, month: str, pack_num: int):
         """
@@ -75,4 +75,4 @@ class ConfigAttrs:
             # max.min excludes 0
             self.pack_number = max(1, min(abs(int(pack_num)), 9))
         except ValueError:
-            raise ValueError(f"Неверный номер пакета: {pack_num}") from None
+            raise ValueError(f"Некорректный номер пакета: {pack_num}") from None
