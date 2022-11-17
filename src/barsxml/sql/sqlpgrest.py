@@ -59,7 +59,7 @@ class SqlProvider(SqlBase):
                 _r.close()
         return next(gen())
 
-    def get_npr_mo(self, data: dict) -> int | None:
+    def get_npr_mo(self, data: dict) -> int:
         npr = data.get('from_firm', None)
         if npr:
             return self.mo_local.get(npr, None)
