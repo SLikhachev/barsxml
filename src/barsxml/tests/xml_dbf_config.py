@@ -4,7 +4,7 @@ from barsxml.config.dbfxml import *
 
 
 tests_dir = Path.script_dir()
-MO_CODE = "228"
+MO_CODE = "445"
 YEAR="2021"
 RR_DIR = str(tests_dir / 'data' / 'import')
 BASE_XML_DIR = tests_dir / 'data' / 'export'

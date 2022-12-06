@@ -1,4 +1,4 @@
-""" This class is used as source of some common attrubutes
+""" This class is used as a source of some common attrubutes
     which are used during xml building
 """
 import re

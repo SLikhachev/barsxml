@@ -1,4 +1,4 @@
-""" settings for pg_rest server'd DB access """
+""" settings for pg_rest server's DB access """
 
 
 SQL_PROVIDER = "pgrest"

@@ -13,27 +13,27 @@ def test_sql_class_init():
     print (f" DBF dir {sql.db_dir}")
     assert sql.rr == f"RR{sql.dbfn}.dbf"
     sql.close()
-    
+
 HPM = (
     ("idcase", "3699"),
     ("nhistory", "3699"),
     ("card", "80901"),
-    ("fam", "Васильчук"),
-    ("im", "Ольга"),
-    ("ot", "Викторовна"),
+    ("fam", "Соловьева"),
+    ("im", "Анфиса"),
+    ("ot", "Полуэктовна"),
     ("pol", "ж"),
-    ("dr", "1954-03-15"),
-    ("npolis", "2556540884000406"),
+    ("dr", "1978-07-31"),
+    ("npolis", "9076540856000421"),
     ("date_1", "2020-12-21"),
     ("date_2", "2020-12-30"),
     ("ds1", "J06.9"),
     ("smo", "25016"),
-    ("prvs", "95"),	
+    ("prvs", "95"),
     ("iddokt", "101-220-211-47"),
     ("profil", "97"),
     ("vidpom", "12"),
     ("smo_ok", "05000"),
-    ("naprlech", "228122568"),
+    ("naprlech", "654122568"),
     ("idsp", "33")
 )
 
@@ -47,7 +47,7 @@ def test_get_hpm_npr_mo_usl():
         if isinstance(rv, float):
             rv = int(rv)
         assert str(rv) == val
-    
+
     assert r1.npr_mo == "250228"
     sql.close()
 
@@ -81,6 +81,5 @@ def test_get_usl():
             assert str(pv) == RPS[row][acnt]
             acnt += 1
         row += 1
-        
+
     sql.close()
-    
