@@ -46,8 +46,8 @@ class SqlProvider(SqlBase):
             self.qurs.execute(pg.SET_ROLE % dbc['role'])
         self.qurs.execute(pg.SET_CUSER, (self.cuser,))
         if self.errors_table != 'None':
-            pass
-            #self.truncate_errors()
+            #pass
+            self.truncate_errors()
 
     def truncate_errors(self):
         print(self.errors_table)
