@@ -316,21 +316,20 @@ def _pacient(_id: str, _d: dict):
 
     assert _d["fam"], f'{_id}-Нет Фамилии пациента'
     assert _d["dr"], f'{_id}-Нет дня рождения пациента'
-    if _d["vpolis"] != 3:
+    if _d["vpolis"] != 3 or _d["smo_ok"] != SMO_OK:
         #print(self.doctype, self.docser, self.docnum)
         assert _d["doctype"] and _d["docnum"] and _d["docser"], \
-            f'{_id}-Тип полиса не ЕНП и неуказан полностью ДУЛ'
-        if _d["smo_ok"] != SMO_OK:
-            assert _d.get("docdate", None) and _d.get("docorg", None),\
-                f'{_id}-Инокраевой без даты и УФМС паспорта'
-        if _d["doctype"] and _d["doctype"] == 14: # pass RF
+            f'{_id}-Укажите полностю ДУЛ'
+        assert _d.get("docdate", None) and _d.get("docorg", None),\
+            f'{_id}-Укажите дату и УФМС ДУЛ'
+        if _d["doctype"] and _d["doctype"] == 14: # passport RusFed
             assert re.fullmatch(r'^\d\d \d\d$', _d["docser"]), \
                 f'{_id}-Серия паспрота не в формате 99 99: {_d["docser"]}'
             assert re.fullmatch(r'^\d{6}$', _d["docnum"]), \
                 f'{_id}-Номер паспорта не 6 цифр'
 
     # local person no doc_date doc_org needed
-    if bool(_d["smo"]):
+    if _d["smo_ok"] == SMO_OK:
         _d["docdate"], _d["docorg"] = None, None
     # self.os_sluch= 2 if self.dost.find('1') > 0 else None
 

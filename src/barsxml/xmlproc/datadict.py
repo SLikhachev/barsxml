@@ -163,6 +163,7 @@ class DataDict(UserDict):
             self: dict
         """
 
+        # This person was processed and added to self already
         if self["id_pac"] in self.pers:
             return self
 
