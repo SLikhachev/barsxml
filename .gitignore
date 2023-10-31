@@ -11,3 +11,4 @@ dist/
 !requirements.txt
 *.ini
 !pytest_demo.ini
+run_tests.sh

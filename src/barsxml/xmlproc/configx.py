@@ -37,12 +37,13 @@ class ConfigAttrs:
 
         # write all sql (provider and connection dict) to sql attr
         self.sql_srv = config.sql_srv
-        self.xmldir = Path( str(config.base_xml_dir) )
+        self.base_xml_dir = Path( str(config.base_xml_dir) )
 
         assert pack_type in TYPES.keys(), f"Тип пакета {pack_type} не поддерживается"
         self.pack_type = pack_type  # string(3)
         if len(pack_type) > 0:
-            self.xmldir = self.xmldir / pack_type   # str abs path to save xml file
+            # str abs path to save xml file data/reestr/xml e.g.
+            self.xmldir = self.base_xml_dir / pack_type
         self.pack_type_digit = TYPES[pack_type]
 
         try:

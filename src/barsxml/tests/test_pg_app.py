@@ -1,5 +1,6 @@
 """ test """
 
+import os
 import importlib
 from pathlib import Path
 from datetime import datetime
@@ -20,8 +21,10 @@ def test_app():
         if not Path.exists(path):
             Path.mkdir(path)
 
+    sign_xml = os.getenv('SIGN_XML') or False
+
     xml = BarsXml(config, config.PACK, config.MO_CODE, config.MONTH, 1)
-    _rc, _pc, zname, errors = xml.make_xml(False, False, False)
+    _rc, _pc, zname, errors = xml.make_xml(False, False, False, sign_xml)
 
     log = f"APP rc={_rc}  pc={_pc}  zname={zname}, errors={errors}"
     print(log)

@@ -16,6 +16,8 @@ from barsxml.xmlstruct.lmxml import LmStruct as lmNS
 from barsxml.xmlproc.configx import ConfigAttrs
 from barsxml.xmlproc.hdrdict import make_hdr_dict
 from barsxml.xmlproc.hdrdict import make_hm_hdr, make_pm_hdr, make_lm_hdr
+from barsxml.xmlproc.datadict import DataDict
+from barsxml.xmlproc.xmlsigner import XmlSigner
 
 
 class XmlWriter:
@@ -58,7 +60,7 @@ class XmlWriter:
         if check:
             return
 
-        # list of 3 tmp files desciptors
+        # list of 3 tmp files descriptors
         self.ns_files = [tmpf(mode="r+", encoding="1251") for _ in self.Ns]
 
     def write_error(self, error: str):
@@ -104,10 +106,11 @@ class XmlWriter:
                 hdr_file.write(line)
             body_file.close()
             hdr_file.write(self.hdr["end_tag"])
+            hdr_file.close()
 
         return _fname
 
-    def write_data(self, data):
+    def write_data(self, data: DataDict):
         """ main data records to temp files """
         #add person to set
         pers = data.get_pers()
@@ -126,13 +129,20 @@ class XmlWriter:
                 encoding="unicode")
             file.write('\n')
 
-    def make_zip(self, rcnt):
+    def make_zip(self, rcnt: int, sign: bool = False):
         """ make zip file anyway and return it """
         with TemporaryDirectory() as tmpdir:
+
             self.hdr = make_hdr_dict(self.cfg, sd_z=rcnt, summ='0.00')
             to_zip = [self.write_hdr_body(tmpdir, cns) for cns in self.Ns]
             # print(to_zip)
             assert len(to_zip) == 3, f"Ошибка формирования файлов {to_zip}"
+
+            # make sig files in sign is required
+            if sign:
+                signer = XmlSigner(self.cfg, tmpdir)
+                _signed = [signer.sign_xml(file) for file in to_zip]
+                assert len(_signed) == 3, f"Ошибка пописания файлов {_signed}"
 
             self.zfile_name = self.hdr["pack_name"].split('.')[0]
 

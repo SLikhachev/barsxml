@@ -41,11 +41,12 @@ class BarsXml(XmlReport):
         self.xml_writer = XmlWriter(self.cfg)
 
 
-    def make_xml(self, mark_sent: bool, get_fresh: bool, check=False) -> Tuple[int, int, str, int]:
+    def make_xml(self, mark_sent: bool, get_fresh: bool, check=False, sign=False) -> Tuple[int, int, str, int]:
         """ main class method
             @param: mark_sent: bool if TRUE set records field talon_type = 2 else ignore
             @param: get_fresh: bool if TRUE ignore already sent else get all records
             @param: check: bool if TRUE -> check tables recs only, don't make xml pack
+            @param: sign: bool if TRUE -> sign each xml file with private key, and include *.sig files in packet
         """
 
         self.xml_writer.init_files(check)
@@ -86,7 +87,7 @@ class BarsXml(XmlReport):
         # end loop of all data
         # make ZIP archive
         if rcnt > 0 and not check:
-            self.xml_writer.make_zip(rcnt)
+            self.xml_writer.make_zip(rcnt, sign)
 
         self.sql.close()
         return self.xml_writer.close(rcnt, len(self.data_dict.pers), errors)
