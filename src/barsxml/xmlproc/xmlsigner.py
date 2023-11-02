@@ -17,9 +17,9 @@ class XmlSigner:
     #md_gost12_256, md_gost12_512, gost-mac-12
     #gost2012_256, gost2012_512
 
-    SIGN_FILE='''openssl cms -sign -signer {crt} -inkey {key} -CAfile {ca} \
-    -engine gost -binary -outform DER \
-    -in {file_name}.xml -out {file_name}.gv.sig'''
+    SIGN_FILE='''/usr/bin/openssl cms -sign -signer {crt} -inkey {key} -CAfile {ca} \
+-engine gost -binary -outform DER \
+-in {file_name}.xml -out {file_name}.gv.sig'''
 
 
     # all files have fixed names
@@ -47,4 +47,7 @@ class XmlSigner:
             file_name=Path(self.cwd) / file_name)
         #print(cmd)
         # if exeption will be arised it will be blown up
-        sup.run(cmd, capture_output=True, check=True, text=True, shell=True)
+        try:
+            sup.run(cmd, capture_output=True, check=True, text=True, shell=True)
+        except sup.CalledProcessError as e:
+            print ("Error: " + str(e.returncode) + " Output:" + e.output.decode())
