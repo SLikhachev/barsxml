@@ -19,7 +19,7 @@ class XmlSigner:
 
     SIGN_FILE='''openssl cms -sign -signer {crt} -inkey {key} -CAfile {ca} \
     -engine gost -binary -outform DER \
-    -in {file} -out {file}.sig'''
+    -in {file_name}.xml -out {file_name}.gv.sig'''
 
 
     # all files have fixed names
@@ -39,11 +39,12 @@ class XmlSigner:
 
     def sign_xml(self, file):
         """ sign file with openssl """
+        file_name = file.split('.')[0]
         cmd = XmlSigner.SIGN_FILE.format(
             crt=self.pem_dir / XmlSigner.PEM_FILES['crt'],
             key=self.pem_dir / XmlSigner.PEM_FILES['key'],
             ca=self.pem_dir / XmlSigner.PEM_FILES['ca'],
-            file=Path(self.cwd) / file)
+            file_name=Path(self.cwd) / file_name)
         #print(cmd)
         # if exeption will be arised it will be blown up
         sup.run(cmd, capture_output=True, check=True, text=True, shell=True)
