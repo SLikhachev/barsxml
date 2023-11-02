@@ -44,6 +44,6 @@ class XmlSigner:
             key=self.pem_dir / XmlSigner.PEM_FILES['key'],
             ca=self.pem_dir / XmlSigner.PEM_FILES['ca'],
             file=Path(self.cwd) / file)
-        print(cmd)
+        #print(cmd)
         # if exeption will be arised it will be blown up
         sup.run(cmd, capture_output=True, check=True, text=True, shell=True)
