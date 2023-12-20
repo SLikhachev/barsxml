@@ -18,15 +18,16 @@ class BarsXml(XmlReport):
 
     def __init__(self, config: object, pack_type: str, mo_code: str, month: str, pack_num: int):
         """
-            @params: config: object(
+            @params
+            :config: object(
                 SQL_PROVIDER, # String
                 sql_srv, # dict
                 year
                 base_xml_dir
-            @param: pack_type string of key for TYPES dict('type': int)
-            @param: mo_code - code of MO '250799'
-            @param: month - pack month '01'-'12'
-            @param: pack_num - sequential pack number
+            :pack_type: str - key on TYPES dict('type': int)
+            :mo_code: str - code of MO '250799'
+            :month: str - pack month '01'-'12'
+            :pack_num: int - sequential pack number
         """
         # sanityze and init Configs
         self.cfg = ConfigAttrs(config, pack_type, mo_code, month, pack_num)
@@ -41,18 +42,21 @@ class BarsXml(XmlReport):
         self.xml_writer = XmlWriter(self.cfg)
 
 
-    def make_xml(self, mark_sent: bool, get_fresh: bool, check=False, sign=False) -> Tuple[int, int, str, int]:
+    def make_xml(self, limit: int, mark_sent: bool, get_fresh: bool, check=False, sign=False) -> Tuple[int, int, str, int]:
         """ main class method
-            @param: mark_sent: bool if TRUE set records field talon_type = 2 else ignore
-            @param: get_fresh: bool if TRUE ignore already sent else get all records
-            @param: check: bool if TRUE -> check tables recs only, don't make xml pack
-            @param: sign: bool if TRUE -> sign each xml file with private key, and include *.sig files in packet
+            @params
+            :limit: int - number of recorde to select from sql table as LIMIT sql clause
+            :mark_sent: bool - if TRUE set records field talon_type = 2 else ignore
+            :get_fresh: bool - if TRUE ignore already sent else get all records
+            :check: bool - if TRUE -> check tables recs only, don't make xml pack
+            :sign: bool - if TRUE -> sign each xml file with private key, and include *.sig files in packet
         """
 
         self.xml_writer.init_files(check)
         self.sql.get_all_usp()
         self.sql.get_all_usl()
         rdata = self.sql.get_hpm_data(get_fresh)
+        limit = abs(int(limit))
 
         # total records, errors
         rcnt, errors = 0, 0
@@ -69,7 +73,9 @@ class BarsXml(XmlReport):
                 self.data_dict.set_ksg(self.sql.get_ksg_data())
                 self.xml_writer.write_data(self.data_dict)
                 rcnt += 1
-                # break
+                # process all or `limit` records if `limit` set
+                if limit > 0 and rcnt >= limit:
+                    break
             except Exception as err:
                 # print(rdata_row)
                 # print(self.sql.spec_usl)

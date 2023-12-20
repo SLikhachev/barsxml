@@ -22,9 +22,11 @@ def test_app():
             Path.mkdir(path)
 
     sign_xml = os.getenv('SIGN_XML') or False
+    limit =  os.getenv('RECS_LIMIT') or 0
+    iimit = int(limit)
 
     xml = BarsXml(config, config.PACK, config.MO_CODE, config.MONTH, 1)
-    _rc, _pc, zname, errors = xml.make_xml(False, False, False, sign_xml)
+    _rc, _pc, zname, errors = xml.make_xml(limit, False, False, False, sign_xml)
 
     log = f"APP rc={_rc}  pc={_pc}  zname={zname}, errors={errors}"
     print(log)
