@@ -19,7 +19,7 @@ class XmlSigner:
 
     SIGN_FILE='''/usr/bin/openssl cms -sign -signer {crt} -inkey {key} -CAfile {ca} \
 -engine gost -binary -outform DER \
--in {file_name}.xml -out {file_name}.gv.sig'''
+-in {file_name}.xml -out {file_name}.sig'''
 
 
     # all files have fixed names
