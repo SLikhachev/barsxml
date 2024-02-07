@@ -259,7 +259,7 @@ HmStruct = SN(
         'tarif',
     ),
     CONST={
-        'version': '3.2',
+        'version': '4.0',
         'sl_id': 1,
         'vers_spec': 'V021',
         'novor': 0
