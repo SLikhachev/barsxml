@@ -42,6 +42,6 @@ LmStruct = SN(
 
     REQUIRED=(),
     IGNORED=('mr', 'snils', 'okatog', 'okatop', 'commentp'),
-    CONST={'version':'4.0'},
+    CONST={'version':'3.2'},
     COUNTABLE={}
 )
