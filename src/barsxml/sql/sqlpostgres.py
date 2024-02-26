@@ -37,10 +37,10 @@ class SqlProvider(SqlBase):
         self.errors_table = dbc.get('errors_table', pg.ERRORS_TABLE_NAME)
         self.talon_tbl = f'{pg.TALONZ_CLIN}{config.ye_ar}'
         self.para_tbl = f'{pg.PARA_CLIN}{config.ye_ar}'
-        self.test = os.getenv('TEST', '')
+        self.test = os.getenv('TEST', None)
 
         self.init_session(dbc)
-        if self.test != 'test_mek':
+        if not self.test:
             self.get_local_mo()
 
     def init_session(self, dbc: dict):
@@ -49,7 +49,7 @@ class SqlProvider(SqlBase):
         if dbc.get('role', None):
             self.qurs.execute(pg.SET_ROLE % dbc['role'])
         self.qurs.execute(pg.SET_CUSER, (self.cuser,))
-        if self.errors_table != 'None' and self.test != 'test_mek':
+        if self.errors_table != 'None' and not self.test:
             self.truncate_errors()
 
     def truncate_errors(self):
