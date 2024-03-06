@@ -315,13 +315,18 @@ def _pacient(_id: str, _d: dict):
     '''
 
     assert _d["fam"], f'{_id}-Нет Фамилии пациента'
-    assert _d["dr"], f'{_id}-Нет дня рождения пациента'
+    assert _d["dr"], f'{_id}-Нет даты рождения пациента'
+    if _d["gender"] and _d["pol"] == 'м':
+        assert _d["gender"] == "male", f'{_id}-Проверте пол пациента'
+
     if _d["vpolis"] != 3 or _d["smo_ok"] != SMO_OK:
         #print(self.doctype, self.docser, self.docnum)
+
         assert _d["doctype"] and _d["docnum"] and _d["docser"], \
             f'{_id}-Укажите полностю ДУЛ'
         assert _d.get("docdate", None) and _d.get("docorg", None),\
             f'{_id}-Укажите дату и УФМС ДУЛ'
+
         if _d["doctype"] and _d["doctype"] == 14: # passport RusFed
             assert re.fullmatch(r'^\d\d \d\d$', _d["docser"]), \
                 f'{_id}-Серия паспрота не в формате 99 99: {_d["docser"]}'

@@ -6,6 +6,7 @@ build/
 dist/
 *.py[cod]
 .idea/
+pytest/
 *.txt
 *.komodoproject
 !requirements.txt

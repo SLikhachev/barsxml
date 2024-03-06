@@ -11,7 +11,7 @@ pytest_plugins= ("pytest_env",)
 def test_app():
     """ test """
     time1 = datetime.now()
-    config = importlib.import_module('barsxml.tests.xml_pg_config')
+    config = importlib.import_module('barsxml.tests.pgsql_config')
 
     path = config.tests_dir
     data_path = config.base_xml_dir / config.PACK

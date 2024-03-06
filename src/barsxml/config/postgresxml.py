@@ -2,6 +2,16 @@
 
 SQL_PROVIDER = "postgres"
 
+TEST_TABLE_EXISTS='''
+SELECT EXISTS (
+    SELECT FROM
+        pg_tables
+    WHERE
+        schemaname = '{}' AND
+        tablename  = '{}'
+    );
+'''
+
 # names of the talons, paraclinic tables
 TALONZ_CLIN='talonz_clin_'
 PARA_CLIN='para_clin_'
@@ -17,6 +27,11 @@ SET_ROLE="SET ROLE '%s';"
 
 # Stmnt for PG < v14
 SET_CUSER='SET SESSION "request.jwt.claim.user" = %s;'
+
+MALE_NAME = 'male_name'
+GET_MALE_NAMES = 'SELECT name FROM male_name;'
+
+MO_LOCAL = 'mo_local'
 
 
 #127.0.0.1:7000/rpc/get_hpm_data?tbl=talonz_clin_21&mont=4&fresh=0

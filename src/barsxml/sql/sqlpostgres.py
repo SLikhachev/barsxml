@@ -8,10 +8,12 @@ from barsxml.config import postgresxml as pg
 
 # Postgres Sql PROVIDER
 class SqlProvider(SqlBase):
-    """ class impl """
+    """ PostgreSQL class impl """
 
     def __init__(self, config):
         super().__init__(config) #self.cfg = config
+        # self.cfg= config # set by the base calss
+
         dbc =  getattr(config, 'sql_srv', {})
         #print(f'{dbc["dbname"]} {dbc["user"]} {dbc["password"]}')
         try:
@@ -30,40 +32,60 @@ class SqlProvider(SqlBase):
         self.qurs = self._db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
         self.qurs1 = self._db.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
 
+        self.schema = dbc.get('schema', 'public')
+        self.role = dbc.get('role', None)
         self.cuser = dbc.get('cuser', None) or dbc['user']
         self.usl = {}
         self.spec_usl = {}
         self.mo_local={}
+        self.male_names=[]
         self.errors_table = dbc.get('errors_table', pg.ERRORS_TABLE_NAME)
         self.talon_tbl = f'{pg.TALONZ_CLIN}{config.ye_ar}'
         self.para_tbl = f'{pg.PARA_CLIN}{config.ye_ar}'
+
+        ## this code now rid of the TEST env variable, so it kept for the memory only
         self.test = os.getenv('TEST', None)
 
-        self.init_session(dbc)
-        if not self.test:
-            self.get_local_mo()
+        self.init_session()
 
-    def init_session(self, dbc: dict):
+
+    def table_exists(self, table: str) -> bool:
+        """ checking of the table exists in the schema """
+        self.qurs.execute(pg.TEST_TABLE_EXISTS.format(self.schema, table))
+        check=self.qurs.fetchone()
+        return check.exists or False
+
+    def init_session(self):
         """ set schema, role and cuser env if any """
-        self.qurs.execute(pg.SET_SCHEMA % dbc.get('schema', 'public'))
-        if dbc.get('role', None):
-            self.qurs.execute(pg.SET_ROLE % dbc['role'])
+        self.qurs.execute(pg.SET_SCHEMA % self.schema)
+        if self.role:
+            self.qurs.execute(pg.SET_ROLE % self.role)
         self.qurs.execute(pg.SET_CUSER, (self.cuser,))
-        if self.errors_table != 'None' and not self.test:
+        if self.errors_table != 'None' and self.table_exists(self.errors_table):
             self.truncate_errors()
 
     def truncate_errors(self):
-        print(self.errors_table)
+        """ truncate the errors table before processing (every processing new error will be found) """
         self.qurs1.execute(pg.TRUNCATE_ERRORS % self.errors_table)
         self._db.commit()
 
     def get_local_mo(self):
         """ write all mo_local def in self state """
+        if not self.table_exists(pg.MO_LOCAL):
+            return
         self.qurs1.execute(pg.GET_ALL_LOCAL_MO)
         for _mo in self.qurs1.fetchall():
             self.mo_local[_mo.scode] = _mo.code
 
+    def get_male_names(self):
+        """ save all male names in self state """
+        if not self.table_exists(pg.MALE_NAME):
+            return
+        self.qurs1.execute(pg.GET_MALE_NAMES)
+        self.male_names = tuple( rec.name for rec in self.qurs1.fetchall() )
+
     def get_hpm_data(self, get_fresh: bool) -> object:
+        """ return rows iterator """
         self.qurs.execute(
             pg.GET_HPM_DATA,
             (self.talon_tbl, self.cfg.int_month, get_fresh))
@@ -75,8 +97,16 @@ class SqlProvider(SqlBase):
             return self.mo_local.get(npr, None)
         return None
 
+    def get_pacient_gender(self, data: dict) -> str:
+        """ define the patient's gender from their first name """
+        first_name = data.get('im', None)
+        if first_name:
+            if first_name.lower() in self.male_names:
+                return 'male'
+        return 'female'
+
     def get_all_usl(self):
-        """ write all usl to self state """
+        """ write all month usl to the self state """
         self.qurs1.execute(pg.GET_ALL_USL, (
             self.talon_tbl, self.para_tbl, self.cfg.int_month))
         for usl in self.qurs1.fetchall():
@@ -87,6 +117,9 @@ class SqlProvider(SqlBase):
             self.usl[usl.idcase].append(usl)
 
     def get_pmu_usl(self, idcase: int) -> list:
+        """ return the list of the dicts
+        of the usl's for the idcase (talon number)
+        """
         usl = []
         for _usl in self.usl.get(idcase, []):
             # _usl - Record namedtuple
@@ -101,6 +134,7 @@ class SqlProvider(SqlBase):
             self.spec_usl[usl.profil] = usl
 
     def get_spec_usl(self, profil: int) -> list:
+        """ return the list of dicts of the special usl by the doc's profil """
         usl = self.spec_usl.get(profil, None)
         if usl is None:
             raise AttributeError(f"Для профиля: {profil} нет специальных услуг")

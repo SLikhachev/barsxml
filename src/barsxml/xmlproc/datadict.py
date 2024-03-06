@@ -198,9 +198,14 @@ class DataDict(UserDict):
 
         return self
 
-    def data_check(self, nmo: int):
+    def data_check(self, check, sql_provider): #nmo: int):
         """ check data """
-        data_checker(self, int(self.mo_code[3:]), nmo)
+        # get mo napravleniya
+        mo_naprav =  sql_provider.get_npr_mo(self)
+        if check:
+            # we check the gender for the test purpose only
+            self["gender"] = sql_provider.get_pacient_gender(self)
+        data_checker(self, int(self.mo_code[3:]), mo_naprav)
         # prepare dict to write
         self.hm_data_attrs().pm_data_attrs().lm_data_attrs()
 

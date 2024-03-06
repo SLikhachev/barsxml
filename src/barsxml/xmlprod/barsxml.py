@@ -63,9 +63,9 @@ class BarsXml(XmlReport):
         for rdata_row in rdata:
             self.data_dict.next_rec(self.sql.rec_to_dict(rdata_row))
             idcase, card = rdata_row.idcase, rdata_row.card
-            nmo = self.sql.get_npr_mo(self.data_dict)  # -> int
+            #nmo = self.sql.get_npr_mo(self.data_dict)  # -> int
             try:
-                self.data_dict.data_check(nmo)
+                self.data_dict.data_check(check, self.sql) #nmo)
                 self.data_dict.set_usl(
                     self.sql.get_pmu_usl(idcase),
                     self.sql.get_spec_usl(rdata_row.profil)
