@@ -61,13 +61,19 @@ class SqlProvider(SqlBase):
         if self.role:
             self.qurs.execute(pg.SET_ROLE % self.role)
         self.qurs.execute(pg.SET_CUSER, (self.cuser,))
-        if self.errors_table != 'None' and self.table_exists(self.errors_table):
-            self.truncate_errors()
+
+        # prepare states data
+        self.truncate_errors()
+        self.get_local_mo()
+        self.get_male_names()
+        self.get_all_usl()
+        self.get_all_usp()
 
     def truncate_errors(self):
         """ truncate the errors table before processing (every processing new error will be found) """
-        self.qurs1.execute(pg.TRUNCATE_ERRORS % self.errors_table)
-        self._db.commit()
+        if self.errors_table != 'None' and self.table_exists(self.errors_table):
+            self.qurs1.execute(pg.TRUNCATE_ERRORS % self.errors_table)
+            self._db.commit()
 
     def get_local_mo(self):
         """ write all mo_local def in self state """
@@ -82,7 +88,7 @@ class SqlProvider(SqlBase):
         if not self.table_exists(pg.MALE_NAME):
             return
         self.qurs1.execute(pg.GET_MALE_NAMES)
-        self.male_names = tuple( rec.name for rec in self.qurs1.fetchall() )
+        self.male_names = list( rec.name for rec in self.qurs1.fetchall() )
 
     def get_hpm_data(self, get_fresh: bool) -> object:
         """ return rows iterator """
@@ -100,6 +106,7 @@ class SqlProvider(SqlBase):
     def get_pacient_gender(self, data: dict) -> str:
         """ define the patient's gender from their first name """
         first_name = data.get('im', None)
+        print(first_name)
         if first_name:
             if first_name.lower() in self.male_names:
                 return 'male'

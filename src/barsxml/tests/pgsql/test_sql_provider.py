@@ -10,13 +10,13 @@ def test_db(db):
     assert db.table_exists('mo_local')
     assert db.table_exists('male_name')
 
-    # test get some tables
-    db.get_local_mo()
+    # test some states props filled with init session
     assert len(db.mo_local) > 10
-    db.get_male_names()
     assert len(db.male_names) > 10
+    assert len(db.usl) == 5
+    assert len(db.spec_usl) > 10
 
-    print([name for name in db.male_names if name.startswith('сер')])
+    #print([name for name in db.male_names if name.startswith('сер')])
 
     # test get all records (talon_type = 1.2)
     hpm = db.get_hpm_data(False)
@@ -36,19 +36,11 @@ def test_db(db):
     undef = db.get_pacient_gender({'im': 'Авдотий'})
     assert (male == 'male') and (female == 'female') and (undef == 'female')
 
-    # test get all pmu for this month
-    db.get_all_usl()
-    assert len(db.usl) == 5
-
     # test get the pmus for the idcase
     usl = db.get_pmu_usl(4)
     assert len(usl) == 1
     assert usl[0]['date_usl'].isoformat() == '2024-03-04' and \
         usl[0]['code_usl'] == 'A05.30.004.002'
-
-    # test get all spec usl
-    db.get_all_usp()
-    assert len(db.spec_usl) > 10
 
     # test get spec usl by the profil
     assert db.spec_usl.get(78, None) # -- рентгенология

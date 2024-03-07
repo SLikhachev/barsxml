@@ -1,34 +1,80 @@
-""" test """
+""" Test the main BarsXml's class method """
 
 import os
-import importlib
 from pathlib import Path
 from datetime import datetime
+import pytest
+
 from barsxml.xmlprod.barsxml import BarsXml
 
-pytest_plugins= ("pytest_env",)
 
-def test_app():
-    """ test """
-    time1 = datetime.now()
-    config = importlib.import_module('barsxml.tests.pgsql_config')
+@pytest.fixture(scope='module')
+def xml(config):
+    """ make class instance """
 
     path = config.tests_dir
-    data_path = config.base_xml_dir / config.PACK
+    data_path = config.base_xml_dir / config.pack_type
     print(f'test path: {data_path.parts}')
     for folder in data_path.parts[-3:]:
         path = path / folder
         if not Path.exists(path):
             Path.mkdir(path)
+    pack_num = 1
 
+    #def __init__(self, config: object, pack_type: str, mo_code: str, month: str, pack_num: int):
+    _xml = BarsXml(config, config.pack_type, config.mo_code, config.month, pack_num)
+    return _xml
+
+@pytest.fixture(scope='module')
+def db(xml):
+    init_db_file = os.getenv('DB_INIT_FILE')
+    _dbc = xml.sql
+
+    assert _dbc.schema == 'webz'
+    assert _dbc.cuser == 'postgres'
+
+    with open(init_db_file, encoding='utf-8') as fd:
+        _dbc.qurs.execute(f"SET search_path={xml.cfg.sql_srv['schema']}")
+        _sql = fd.read()
+        _dbc.qurs.execute(_sql)
+        _dbc._db.commit()
+
+    yield _dbc
+    #_dbc.close()
+
+
+def test_sql_class_init(db):
+    """ test the SqlProvider class was initiaded properly """
+
+    assert db.table_exists('mo_local')
+    assert db.table_exists('male_name')
+
+    # test some states props filled with init session
+    assert len(db.mo_local) > 10
+    assert len(db.male_names) > 10
+    assert len(db.usl) == 5
+    assert len(db.spec_usl) > 10
+
+
+def test_make_method(xml):
+    """ test the main method with the params from the pytest.ini file"""
+
+    time1 = datetime.now()
     sign_xml = os.getenv('SIGN_XML') or False
     limit =  os.getenv('RECS_LIMIT') or 0
-    iimit = int(limit)
+    check = os.getenv('CHECK_ONLY') or False
+    mark_sent = os.getenv('MARK_SENT') or False
+    get_fresh = os.getenv('GET_FRESH') or False
 
-    xml = BarsXml(config, config.PACK, config.MO_CODE, config.MONTH, 1)
-    _rc, _pc, zname, errors = xml.make_xml(limit, False, False, False, sign_xml)
+    limit = int(limit)
 
-    log = f"APP rc={_rc}  pc={_pc}  zname={zname}, errors={errors}"
-    print(log)
-    time2 = datetime.now()
-    print(f'Processing time {(time2-time1).seconds} sec')
+    try:
+        #def make_xml(self, limit: int, mark_sent: bool, get_fresh: bool, check=False, sign=False) -> Tuple[int, int, str, int]:
+        _rc, _pc, zname, errors = xml.make_xml(limit, mark_sent, get_fresh, check, sign_xml)
+
+        log = f"APP HPM_records={_rc}  LM_records={_pc}  ZIP_file_name={zname}, found_errors={errors}"
+        print(log)
+        time2 = datetime.now()
+        print(f'Processing time {(time2-time1).seconds} sec')
+    except Exception as exc:
+        print(f"The test make method exception: {exc}")

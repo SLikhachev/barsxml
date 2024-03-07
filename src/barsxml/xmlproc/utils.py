@@ -168,8 +168,8 @@ def _smo_polis(_id: str, _d: dict):
 
     try:
         _d["id_pac"] = int(_d["id_pac"])
-    except ValueError:
-        raise ValueError(f'{_id}-Номер полиса не целое число')
+    except ValueError as exc:
+        raise ValueError(f'{_id}-Номер полиса не целое число') from exc
 
 
 def _purp(_id: str, _d: dict):
@@ -316,8 +316,11 @@ def _pacient(_id: str, _d: dict):
 
     assert _d["fam"], f'{_id}-Нет Фамилии пациента'
     assert _d["dr"], f'{_id}-Нет даты рождения пациента'
-    if _d["gender"] and _d["pol"] == 'м':
-        assert _d["gender"] == "male", f'{_id}-Проверте пол пациента'
+    # check geneder
+    if _d.get("gender", None):
+        print("dadat: ", _d["gender"])
+        if _d["pol"] == 'м':
+            assert _d["gender"] == "male", f'{_id}-Проверте пол пациента'
 
     if _d["vpolis"] != 3 or _d["smo_ok"] != SMO_OK:
         #print(self.doctype, self.docser, self.docnum)

@@ -53,8 +53,11 @@ class BarsXml(XmlReport):
         """
 
         self.xml_writer.init_files(check)
-        self.sql.get_all_usp()
-        self.sql.get_all_usl()
+
+        # this code was moved to the SqlProvider class
+        #self.sql.get_all_usp()
+        #self.sql.get_all_usl()
+
         rdata = self.sql.get_hpm_data(get_fresh)
         limit = abs(int(limit))
 
@@ -70,6 +73,7 @@ class BarsXml(XmlReport):
                     self.sql.get_pmu_usl(idcase),
                     self.sql.get_spec_usl(rdata_row.profil)
                 )
+                # a KSG in the current implementation not used (just empty dict)
                 self.data_dict.set_ksg(self.sql.get_ksg_data())
                 self.xml_writer.write_data(self.data_dict)
                 rcnt += 1

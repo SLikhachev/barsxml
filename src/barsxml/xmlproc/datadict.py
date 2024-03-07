@@ -3,8 +3,8 @@
 ##
 from itertools import chain
 from collections import UserDict
-from barsxml.xmlprod.utils import data_checker, _iddokt
-from barsxml.xmlprod.utils import USL_PURP, USL_PRVS, \
+from barsxml.xmlproc.utils import data_checker, _iddokt
+from barsxml.xmlproc.utils import USL_PURP, USL_PRVS, \
     PROFOSM_PURP, SESTRY_PROF, STOM_PROF, SMO_OK #, ED_COL_IDSP
 
 
