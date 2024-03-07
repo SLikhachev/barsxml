@@ -43,6 +43,7 @@ class Config:
     mo_code: int
     pack_type: str
     tests_dir: str
+    init_db_file: str = ''
     POSTGRES = None
     SQL_PROVIDER: str = 'postgres'
     base_xml_dir: str = ''
@@ -70,6 +71,7 @@ def config():
         os.getenv('PACK_TYPE'),
         Path.script_dir().parent
     )
+    cfg.init_db_file = os.getenv('DB_INIT_FILE') or ''
     cfg.base_xml_dir = cfg.tests_dir / 'data' / cfg.sql_srv['dbname']
     cfg.POSTGRES = cfg.sql_srv
     return cfg
@@ -78,13 +80,12 @@ def config():
 def db(config):
     _dbc = SqlProvider(config)
 
-    init_db_file = os.getenv('DB_INIT_FILE')
-
-    with open(init_db_file, encoding='utf-8') as fd:
-        _dbc.qurs.execute(f"SET search_path={config.sql_srv['schema']}")
-        _sql = fd.read()
-        _dbc.qurs.execute(_sql)
-        _dbc._db.commit()
+    if config.init_db_file:
+        with open(config.init_db_file, encoding='utf-8') as fd:
+            _dbc.qurs.execute(f"SET search_path={config.sql_srv['schema']}")
+            _sql = fd.read()
+            _dbc.qurs.execute(_sql)
+            _dbc._db.commit()
 
     yield _dbc
     _dbc.close()

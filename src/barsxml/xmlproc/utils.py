@@ -318,7 +318,7 @@ def _pacient(_id: str, _d: dict):
     assert _d["dr"], f'{_id}-Нет даты рождения пациента'
     # check geneder
     if _d.get("gender", None):
-        print("dadat: ", _d["gender"])
+        #print("dadat: ", _d["gender"])
         if _d["pol"] == 'м':
             assert _d["gender"] == "male", f'{_id}-Проверте пол пациента'
 

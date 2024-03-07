@@ -106,7 +106,7 @@ class SqlProvider(SqlBase):
     def get_pacient_gender(self, data: dict) -> str:
         """ define the patient's gender from their first name """
         first_name = data.get('im', None)
-        print(first_name)
+        #print(first_name)
         if first_name:
             if first_name.lower() in self.male_names:
                 return 'male'
