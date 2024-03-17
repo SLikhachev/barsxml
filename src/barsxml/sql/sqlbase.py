@@ -17,7 +17,7 @@ class SqlBase(ABC):
                 year: int - year of the report 2022
                 ye_ar: int -  last 2 digit of year
                 month - month ot report '01'-'12'
-                _month: int(month)
+                int_month: int(month)
                 pack_number: int pack number
                 ... some other
         """

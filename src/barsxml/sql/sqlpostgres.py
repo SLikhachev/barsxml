@@ -42,7 +42,7 @@ class SqlProvider(SqlBase):
         self.errors_table = dbc.get('errors_table', pg.ERRORS_TABLE_NAME)
         self.talon_tbl = f'{pg.TALONZ_CLIN}{config.ye_ar}'
         self.para_tbl = f'{pg.PARA_CLIN}{config.ye_ar}'
-        self.int_month = config.int_month
+        self.int_month = config.getattr('int_month', None)
 
         ## this code now rid of the TEST env variable, so it kept for the memory only
         self.test = os.getenv('TEST', None)
@@ -66,9 +66,10 @@ class SqlProvider(SqlBase):
         # prepare states data
         self.truncate_errors()
         self.get_local_mo()
-        self.get_male_names()
-        self.get_all_usl()
-        self.get_all_usp()
+        if self.int_month:
+            self.get_male_names()
+            self.get_all_usl()
+            self.get_all_usp()
 
     def truncate_errors(self):
         """ truncate the errors table before processing (every processing new error will be found) """
