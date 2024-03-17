@@ -42,7 +42,7 @@ class SqlProvider(SqlBase):
         self.errors_table = dbc.get('errors_table', pg.ERRORS_TABLE_NAME)
         self.talon_tbl = f'{pg.TALONZ_CLIN}{config.ye_ar}'
         self.para_tbl = f'{pg.PARA_CLIN}{config.ye_ar}'
-        self.int_month = config.getattr('int_month', None)
+        self.int_month = getattr(config, 'int_month', None)
 
         ## this code now rid of the TEST env variable, so it kept for the memory only
         self.test = os.getenv('TEST', None)
