@@ -42,6 +42,7 @@ class SqlProvider(SqlBase):
         self.errors_table = dbc.get('errors_table', pg.ERRORS_TABLE_NAME)
         self.talon_tbl = f'{pg.TALONZ_CLIN}{config.ye_ar}'
         self.para_tbl = f'{pg.PARA_CLIN}{config.ye_ar}'
+        self.int_month = config.int_month
 
         ## this code now rid of the TEST env variable, so it kept for the memory only
         self.test = os.getenv('TEST', None)
@@ -94,7 +95,7 @@ class SqlProvider(SqlBase):
         """ return rows iterator """
         self.qurs.execute(
             pg.GET_HPM_DATA,
-            (self.talon_tbl, self.cfg.int_month, get_fresh))
+            (self.talon_tbl, self.int_month, get_fresh))
         return self.qurs.fetchall()
 
     def get_npr_mo(self, data: dict) -> int:
@@ -115,7 +116,7 @@ class SqlProvider(SqlBase):
     def get_all_usl(self):
         """ write all month usl to the self state """
         self.qurs1.execute(pg.GET_ALL_USL, (
-            self.talon_tbl, self.para_tbl, self.cfg.int_month))
+            self.talon_tbl, self.para_tbl, self.int_month))
         for usl in self.qurs1.fetchall():
             if self.usl.get(usl.idcase, None) is None:
                 self.usl[usl.idcase] = [usl]

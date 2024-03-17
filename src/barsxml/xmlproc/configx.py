@@ -17,7 +17,7 @@ class ConfigAttrs:
                 year, #String
                 base_xml_dir
 
-            @param: pack_type string of key for TYPES dict('type': int)
+            @param: pack_type - string of key for TYPES dict('type': int)
                 where int is first digit in two last one of 'Tn' in the pack name
                     (n is a sequential pack number in pack series) and T is
                     app - ambulance: 0 | 1
