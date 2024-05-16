@@ -142,7 +142,7 @@ class XmlWriter:
             if sign:
                 signer = XmlSigner(self.cfg, tmpdir)
                 _signed = [signer.sign_xml(file) for file in to_zip]
-                assert len(_signed) == 3, f"Ошибка пописания файлов {_signed}"
+                assert len(_signed) == 3, f"Ошибка подписания файлов {_signed}"
 
             self.zfile_name = self.hdr["pack_name"].split('.')[0]
 
@@ -154,19 +154,24 @@ class XmlWriter:
 
     def close(self, rcnt: int, pers: int, errors: int) -> Tuple[int, int, str, int]:
         """ close openened files """
+
+        output_file = self.error_fd.name
         if not self.error_fd.closed:
             self.error_fd.close()
-            if errors == 0:
-                os.remove(self.error_fd.name)
+
+        if errors == 0:
+            os.remove(self.error_fd.name)
+            output_file=''
 
         # close file anyway
         for file in self.ns_files:
             if not file.closed:
                 file.close()
 
-        zipname = self.error_fd.name
+        # if zip had been write then return zip
+        # else errors file or empty string
         if len(str(self.zfile_name)) > 0:
-            zipname = self.xmldir / f'{self.zfile_name}.zip'
+            output_file = self.xmldir / f'{self.zfile_name}.zip'
 
         # total HM records, LM records, ZIP name, errors find
-        return rcnt, pers, str(zipname), errors
+        return rcnt, pers, str(output_file), errors

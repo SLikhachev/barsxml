@@ -213,7 +213,7 @@ class DataDict(UserDict):
         """ check pmu """
         if self["prvs"] in USL_PRVS:
             assert pmu > 0, \
-                f'{self["idcase"]}-Для SPEC {self["specfic"]}, PRVS. {self["prvs"]} нет ПМУ'
+                f'{self["idcase"]}- ошибка ПМУ: нет тарифа, кода подр или кода спец'
 
     def calc_sumv(self):
         """ calc """
