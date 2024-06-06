@@ -319,8 +319,8 @@ def _pacient(_id: str, _d: dict):
     # check geneder
     if _d.get("gender", None):
         #print("dadat: ", _d["gender"])
-        if _d["pol"] == 'м':
-            assert _d["gender"] == "male", f'{_id}-Проверте пол пациента'
+        pol = (_d["gender"] == "male" and _d["pol"] == 'м') or (_d["gender"] == "female" and _d["pol"] == 'ж')
+        assert pol, f'{_id}-Проверте пол пациента'
 
     if _d["vpolis"] != 3 or _d["smo_ok"] != SMO_OK:
         #print(self.doctype, self.docser, self.docnum)
