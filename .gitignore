@@ -10,6 +10,5 @@ pytest/
 *.txt
 *.komodoproject
 !requirements.txt
-*.ini
-!pytest_demo.ini
+pytest_hokuto.ini
 run_tests.sh

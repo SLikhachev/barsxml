@@ -30,6 +30,8 @@ ED_COL_IDSP = (25, 28, 29)
 REGION = '250'
 SMO_OK = "05000"
 
+# pacient status 0 -none 35-svo solder 65- svo solder's family member
+PAC_SOC = (0, 35, 65)
 class RowObject(SimpleNamespace):
     """ class """
     def __init__(self, row):
@@ -82,6 +84,12 @@ def _iddokt(_id: str, snils: str):
 
 
 def _fmt_000(val):
+    ''' Format given value as 3 digits zero padded string
+        If given value is None, return empty string
+        If given value is a string, interpret it as a number
+        If given value is a number, format it as 3 digits zero padded string
+        If formatted string is longer that 3 characters, return last 3 characters
+    '''
     if val is None:
         return ''
     _v = int(val)
@@ -297,23 +305,23 @@ def _doct(_id: str, _d: dict):
     if _d["rslt"] < 100:
         _d["rslt"] += _d["usl_ok"] * 100
 
+"""
+-- PACIENT
+    crd.fam,
+    crd.im,
+    crd.ot,
+    crd.gender as pol,
+    crd.birth_date as dr,
+    crd.dost as dost,
+    crd.dul_type as doctype,
+    crd.dul_serial as docser,
+    crd.dul_number as docnum,
+    crd.dul_date as docdate,
+    crd.dul_org as docorg
+    crd.soc
+"""
 
-def _pacient(_id: str, _d: dict):
-    '''
-    -- PACIENT
-        crd.fam,
-        crd.im,
-        crd.ot,
-        crd.gender as pol,
-        crd.birth_date as dr,
-        crd.dost as dost,
-        crd.dul_type as doctype,
-        crd.dul_serial as docser,
-        crd.dul_number as docnum,
-        crd.dul_date as docdate,
-        crd.dul_org as docorg
-    '''
-
+def _pac_name(_id: str, _d: dict):
     assert _d["fam"], f'{_id}-Нет Фамилии пациента'
     assert _d["dr"], f'{_id}-Нет даты рождения пациента'
     # check geneder
@@ -321,7 +329,13 @@ def _pacient(_id: str, _d: dict):
         #print("dadat: ", _d["gender"])
         pol = (_d["gender"] == "male" and _d["pol"] == 'м') or (_d["gender"] == "female" and _d["pol"] == 'ж')
         assert pol, f'{_id}-Проверте пол пациента'
+    soc = _d.get("soc", None)
+    if  soc is None:
+        soc = 0
+    assert soc in PAC_SOC, f'{_id}-Неверный код SOC статуса пациента'
+    _d["soc"] = _fmt_000(soc)
 
+def _pac_doc(_id: str, _d: dict):
     if _d["vpolis"] != 3 or _d["smo_ok"] != SMO_OK:
         #print(self.doctype, self.docser, self.docnum)
 
@@ -363,7 +377,8 @@ def data_checker(data: dict, this_mo: int, napr_mo: int):# -> dict:
         _naprav_hosp,
         _diag,
         _doct,
-        _pacient,
+        _pac_name,
+        _pac_doc,
         _d_type,
     )
     for func in fns:

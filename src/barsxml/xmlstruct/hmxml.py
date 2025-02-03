@@ -94,7 +94,8 @@ HmStruct = SN(
             'inv',  # ignore
             'mse',  # ignore
             'novor',
-            'vnov_d'  # ignore
+            'vnov_d',  # ignore
+            'soc'
         )),
 
         ('z_sl', (
@@ -203,6 +204,7 @@ HmStruct = SN(
         'vpolis',  # crd.polis_type
         #'npolis',  # crd.polis_num
         'novor',
+        'soc',
 
         ## Z_sl
         'idcase',
@@ -259,10 +261,10 @@ HmStruct = SN(
         'tarif',
     ),
     CONST={
-        'version': '4.0',
+        'version': '5.0',
         'sl_id': 1,
         'vers_spec': 'V021',
-        'novor': 0
+        'novor': 0,
     },
     COUNTABLE={
         'usl':'idserv',
