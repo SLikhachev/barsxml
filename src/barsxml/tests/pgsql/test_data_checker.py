@@ -6,7 +6,11 @@ def test_gender(db, data_dict):
     """ Test the gender check"""
     #print(rdata[0])
     get_fresh=False
+
+    # read rows of data
     rdata = db.get_hpm_data(get_fresh)
+
+    # make next record from 1st row
     data_dict.next_rec(db.rec_to_dict(rdata[0]))
 
     npolis = data_dict["npolis"]

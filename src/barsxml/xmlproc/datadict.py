@@ -1,12 +1,15 @@
 """ Data Dict class definition """
 
 ##
+import re
 from itertools import chain
 from collections import UserDict
 from barsxml.xmlproc.utils import data_checker, _iddokt
 from barsxml.xmlproc.utils import USL_PURP, USL_PRVS, \
     PROFOSM_PURP, SESTRY_PROF, STOM_PROF, SMO_OK #, ED_COL_IDSP
 
+ds_inokray_atu = re.compile("^[A-T, U]")
+ds_inokray_z= re.compile("^Z")
 
 class DataDict(UserDict):
     """ class used for store the current DB record
@@ -90,13 +93,23 @@ class DataDict(UserDict):
 
             def __inokray():
                 # SMO другой субъект
-                # выдает ошибки 25065 (видать неправильно)
-                if self["smo_ok"] != SMO_OK:
-                    if _visits == 1:
-                        return '1.0'  # posesh
-                    return '3.0'  # obrash
+                # Поправки на 02.2025
+                # Местный
+                if self["smo_ok"] == SMO_OK:
+                    return None
+                # Платим только так (услуга, посещение)
+                if self["idsp"] not in (28, 29):
+                    return None
+                # Такой диагноз Axx-Txx Uxx
+                ds = self["ds1"][0].upper()
+                dsm = ds_inokray_atu.match(ds)
+                if dsm is not None:
+                    return '1.3'
+                # Такой диагноз Zxx
+                dsm = ds_inokray_z.match(ds)
+                if dsm is not None:
+                    return '2.6'
                 return None
-
             def __pcel(for_pom, purp):  # -> str
                 if for_pom == 2:
                     return '1.1'  # Посещениe в неотложной форме
