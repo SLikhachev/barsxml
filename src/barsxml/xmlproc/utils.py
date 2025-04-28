@@ -221,6 +221,10 @@ def _naprav_cons(_id: str, _d: dict):
         tal.nsndhosp,
         tal.d_type,
     '''
+
+    if _d.get("naprlech", None):
+        assert len(str(_d["naprlech"])) < 16, f"{_id}-Номер направления слишком длинный"
+
     # consultaciya
     if _d["npr_mo"]:
         if _d.get("from_firm", None) is None:
@@ -329,9 +333,7 @@ def _pac_name(_id: str, _d: dict):
         #print("dadat: ", _d["gender"])
         pol = (_d["gender"] == "male" and _d["pol"] == 'м') or (_d["gender"] == "female" and _d["pol"] == 'ж')
         assert pol, f'{_id}-Проверте пол пациента'
-    soc = _d.get("soc", None)
-    if  soc is None:
-        soc = 0
+    soc = int( _d.get("soc", 0) )
     assert soc in PAC_SOC, f'{_id}-Неверный код SOC статуса пациента'
     _d["soc"] = _fmt_000(soc)
 

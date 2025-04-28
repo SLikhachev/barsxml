@@ -47,6 +47,7 @@ class Config:
     POSTGRES = None
     SQL_PROVIDER: str = 'postgres'
     base_xml_dir: str = ''
+    fresh: bool = False
 
 # The simple case where the Row-Level-Security not applied
 @pytest.fixture(scope='session')
@@ -74,6 +75,7 @@ def config():
     cfg.init_db_file = os.getenv('DB_INIT_FILE') or ''
     cfg.base_xml_dir = cfg.tests_dir / 'data' / cfg.sql_srv['dbname']
     cfg.POSTGRES = cfg.sql_srv
+    cfg.fresh = os.getenv('GET_FRESH') or False,
     return cfg
 
 @pytest.fixture(scope='session')
@@ -98,5 +100,15 @@ def db(config):
 
 
 @pytest.fixture(scope='session')
-def data_dict(config):
-    return DataDict(config.mo_code)
+def data_dict(config, db):
+    data = DataDict(config.mo_code)
+
+    # read rows of data
+    rdata = db.get_hpm_data(config.fresh)
+
+    # make next record from 1st row
+    data.next_rec(db.rec_to_dict(rdata[0]))
+
+    # set SOC status 
+    data["soc"] = 0
+    return data

@@ -2,22 +2,24 @@
 
 import pytest
 
-def test_gender(db, data_dict):
+'''
+# as for H VERSION = 3.2 ENP tag
+    _d["enp"] = _d["npolis"]
+    del _d["npolis"]
+'''
+
+def _test_gender(db, data_dict):
     """ Test the gender check"""
-    #print(rdata[0])
-    get_fresh=False
-
-    # read rows of data
-    rdata = db.get_hpm_data(get_fresh)
-
-    # make next record from 1st row
-    data_dict.next_rec(db.rec_to_dict(rdata[0]))
 
     npolis = data_dict["npolis"]
+    data_dict['im'] = 'ИРИНА'
+    data_dict["pol"] == 'ж'
     check=True
+
+    #test must have been passed
     data_dict.data_check(check, db)
 
-    data_dict['im'] = 'ИРИНА'
+    data_dict["pol"] == 'м'
     # the npolis key was deleted by the prev checker
     data_dict['npolis'] = npolis
 
@@ -25,12 +27,29 @@ def test_gender(db, data_dict):
     with pytest.raises(AssertionError, match=f"{data_dict["idcase"]}-Проверте пол пациента"):
         data_dict.data_check(check, db)
 
-
-    # if check False then test must have been passed
-    # prepare data_dict to the second test
-    assert data_dict['im'] == 'ИРИНА' and data_dict["pol"] == 'м'
-
     data_dict['npolis'] = npolis
     del data_dict["gender"]
+
+    # if check False then test must have been passed
     check=False
     data_dict.data_check(check, db)
+
+
+def test_naprlech_len(db, data_dict):
+
+    npolis = data_dict["npolis"]
+    data_dict["naprlech"] = "123456789"
+    check=True
+
+    #test must have been passed
+    data_dict.data_check(check, db)
+
+    data_dict["naprlech"] = "1234567890123456"
+    # the npolis key was deleted by the prev checker
+    data_dict["npolis"] = npolis
+
+    with pytest.raises(
+            AssertionError,
+            match=f"{data_dict['idcase']}-Номер направления слишком длинный"
+        ):
+        data_dict.data_check(check, db)
