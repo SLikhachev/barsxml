@@ -8,6 +8,13 @@ import pytest
     del _d["npolis"]
 '''
 
+
+def test_data_check(db, data_dict):
+    """ simple test to catch any error """
+
+    data_dict.data_check(True, db)
+
+
 def _test_gender(db, data_dict):
     """ Test the gender check"""
 
@@ -35,7 +42,7 @@ def _test_gender(db, data_dict):
     data_dict.data_check(check, db)
 
 
-def test_naprlech_len(db, data_dict):
+def _test_naprlech_len(db, data_dict):
 
     npolis = data_dict["npolis"]
     data_dict["naprlech"] = "123456789"

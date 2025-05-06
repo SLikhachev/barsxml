@@ -109,6 +109,6 @@ def data_dict(config, db):
     # make next record from 1st row
     data.next_rec(db.rec_to_dict(rdata[0]))
 
-    # set SOC status 
-    data["soc"] = 0
+    # set SOC status
+    #data["soc"] = 0
     return data

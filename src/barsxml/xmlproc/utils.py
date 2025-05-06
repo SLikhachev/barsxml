@@ -1,30 +1,34 @@
-""" module """
+""" The module contains a base checks/validators
+    for main record to produce xmls
+"""
+
 from types import SimpleNamespace
 import re
 from functools import reduce
 
-# XRAY, UZI, ENDOSC, LABGEN, GISTOL
-#profil
+# XRAY, UZI (ultra sonic reserach), ENDOSCOPY, LABGENETICS, GISTOLoGY
+# PROFIL med profils to interrest us
 USL_PROF = (78, 106, 123, 40, 15)
 
-#specfic
+# SPECFIC med speciality to interrest
 USL_SPEC = (63, 10, 85,)
 
-#prvs
+# PRVS doctor's spec flags
 USL_PRVS = (31, 48, 60, 81, 93)
 
-# diagnostic purpose
+# PURP diagnostic purpose
 USL_PURP = (4,)
 
-# pofosmotr purpose
+# PURP pofosmotr purpose
 PROFOSM_PURP = (21, 22)
 
-#stomatology prifil
+# PROFIL stomatology prifil
 STOM_PROF = (85, 86, 87, 88, 89, 90)
 
-#
+# PROFIL
 SESTRY_PROF = (82, 83)
 
+# IDSP Pay profil
 ED_COL_IDSP = (25, 28, 29)
 
 REGION = '250'
@@ -32,6 +36,8 @@ SMO_OK = "05000"
 
 # pacient status 0 -none 35-svo solder 65- svo solder's family member
 PAC_SOC = (0, 35, 65)
+
+
 class RowObject(SimpleNamespace):
     """ class """
     def __init__(self, row):
@@ -45,18 +51,42 @@ class RowObject(SimpleNamespace):
             raise TypeError(f'Row Object has non supported type: {type(row)}')
 
     def from_dict(self, data):
-        """ from_dict """
+        """
+        Populate the attributes of the object with key-value pairs from a dictionary.
+
+        :param data: A dictionary containing attribute names as keys and their corresponding values.
+        """
         for name, value in data.items():
+            # Set each item in the dictionary as an attribute of the object
             setattr(self, name, value)
 
     def psycopg_row_data(self, data):
-        """ row_data """
+        """
+        Populate the attributes of the object with key-value pairs
+        from a named tuple returned by psycopg2.
+
+        :param data: A named tuple containing attribute names as keys
+                     and their corresponding values.
+        """
         for name, value in data._asdict().items():
+            # Set each item in the named tuple as an attribute of the object
             setattr(self, name, value)
 
     def odbc_row_data(self, data):
-        """ row data """
+        """
+        Populate the attributes of the object with key-value pairs from
+        an ODBC row data object.
+
+        :param data: An ODBC row data object containing attribute names as keys
+                     and their corresponding values.
+        """
         def attrs(idx, desc):
+            """
+            Set an attribute of the object from an ODBC row data object.
+
+            :param idx: Index of the ODBC row data object to set.
+            :param desc: Tuple containing the attribute name and description.
+            """
             _d = data[idx]
             if isinstance(_d, float):
                 _d = int(_d)
@@ -64,23 +94,38 @@ class RowObject(SimpleNamespace):
             idx += 1
             return idx
 
+        # Iterate over the ODBC row data object and set each attribute
         reduce(attrs, data.cursor_description, 0)
 
 SNILS = r'^\d{3}-\d{3}-\d{3} \d\d$'
 IDDOKT = r'^\d{11}$'
 
 def _iddokt(_id: str, snils: str):
+    """
+    Format given SNIILS in correct form for further processing.
+
+    :param _id: Unique identifier of the record being processed.
+    :param snils: SNIILS of the doctor which needs to be formatted.
+    :return: Formatted SNIILS as a string.
+    """
     if re.fullmatch(IDDOKT, snils):
         return snils
+
     _sl = snils.split('-')
     if len(_sl) == 4:
+        # If SNIILS is given in format 'XXX-XXX-XXXX XXXX',
+        # split it into two parts and join them with a space in between.
         _sn = f"{'-'.join(_sl[:3])} {_sl[3]}"
     else:
+        # If SNIILS is given in format 'XXXXXXXXXXX', just assign it.
         _sn = snils
+
+    # Check that the SNIILS is in a correct format.
     assert re.fullmatch(SNILS, _sn), \
        f"{_id}-СНИЛС доктора - неверный формат: {_sn}"
+
+    # Remove all spaces and dashes from the SNIILS.
     return _sn.replace('-', '').replace(' ', '')
-    #return _sn
 
 
 def _fmt_000(val):
@@ -130,12 +175,11 @@ def _smo_polis(_id: str, _d: dict):
         crd.smo_okato as smo_ok,
         crd.smo_name as smo_nam,
     '''
-    if not _d.get("pr_nov", None):
-        _d["pr_nov"] = 1 if bool(_d.get("mek", 0)) else 0
+    #if _d.get("pr_nov", None):
+    _d["pr_nov"] = 1 if _d.get("mek", None) else 0
 
     # set smo, polis from talon
-    if _d.get("polis_type", None) is not None and \
-        _d.get("polis_num", None) is not None:
+    if _d.get("polis_type", None) and _d.get("polis_num", None):
 
         for attr in (
                 ("vpolis", "polis_type"),
@@ -149,12 +193,15 @@ def _smo_polis(_id: str, _d: dict):
 
     assert _d.get("vpolis", None), f'{_id}-Тип полиса не указан'
     assert _d.get("npolis", None), f'{_id}-Номер полиса не указан'
+
     if _d["vpolis"] == 1:
         assert _d.get("spolis", None) and _d["npolis"], \
             f'{_id}-Тип полиса не соответвует типу 1 (старый)'
+
     elif _d["vpolis"] == 2:
         assert len(_d["npolis"]) == 9, \
             f'{_id}-Тип полис не времянка, не соответвует VPOLIS 2 (времянка)'
+
     elif _d["vpolis"] == 3:
         assert len(_d["npolis"]) == 16, \
             f'{_id}-Тип полис не ЕНП, не соответвует VPOLIS 3 (ЕНП)'
@@ -166,9 +213,8 @@ def _smo_polis(_id: str, _d: dict):
     else:
         raise AttributeError(f'{_id}-Тип полиса не поддерживаем')
 
-    # smo is logical False (empty string or zero value)
-    smo = _d.get("smo", None)
-    if smo is not None and not bool(smo):
+    # if smo is logical False (None, empty string or zero value)
+    if not _d.get("smo", None):
         _d["smo"] = None
 
     # as for H VERSION = 3.2 SMO_OK tag was deleted
@@ -193,8 +239,11 @@ def _purp(_id: str, _d: dict):
     # assert self.specfic, f'{_id}-SPECFIC ( специальность из регионального справочника) не указан'
     if not _d["purp"]:
         _d["purp"] = 2  # for usl_ok=2
+
     assert _d[ "usl_ok"], f'{_id}-USL_OK (условия оказания) не указан'
+
     assert _d[ "for_pom"], f'{_id}-FOR_POM (форма помощи) не указан'
+
     assert _d[ "rslt"] and _d["ishod"], f'{_id}-RESULT/ISHOD (исход, результат) не указан'
 
 
@@ -203,14 +252,17 @@ def _visits(_id: str, _d: dict):
         tal.visit_pol,
         tal.visit_home as visit_hom,
     '''
-    if _d["usl_ok"] == 3:
+    if _d["usl_ok"] == 3: # АПП
         assert _d["visit_pol"] or _d["visit_hom"], f'{_id}-Нуль количество посещений АПП'  # yet
         return
-    if _d["usl_ok"] == 2:
+
+    if _d["usl_ok"] == 2: # ДС
         _d["kd_z"] = _d["visit_ds"] if _d["visit_ds"] else _d["visit_hs"]
         assert _d["kd_z"],  f'{_id}-Нуль количество посещений ДС'
         return
+
     assert False, f'{_id}- Неверный тип USL_OK для АПП, ДС'
+
 
 # приняли на консультацию
 def _naprav_cons(_id: str, _d: dict):
@@ -226,14 +278,18 @@ def _naprav_cons(_id: str, _d: dict):
         assert len(str(_d["naprlech"])) < 16, f"{_id}-Номер направления слишком длинный"
 
     # consultaciya
-    if _d["npr_mo"]:
+    if _d.get("npr_mo", None):
+
         if _d.get("from_firm", None) is None:
             _d["from_firm"] = _d["npr_mo"][-3:]
+
         if _d["from_firm"] != _d["mo"]:
             pass
+
         #    assert d.get("naprlech", False), f'{_id}-Консультация нет Напаравления в другое МО'
         if _d.get("npr_date", None) is None:
             _d["npr_date"] = _d["date_1"]
+
         return
 
     # diagnostic planovaya
@@ -329,11 +385,12 @@ def _pac_name(_id: str, _d: dict):
     assert _d["fam"], f'{_id}-Нет Фамилии пациента'
     assert _d["dr"], f'{_id}-Нет даты рождения пациента'
     # check geneder
-    if _d.get("gender", None):
+    if _d.get("gender", False):
         #print("dadat: ", _d["gender"])
         pol = (_d["gender"] == "male" and _d["pol"] == 'м') or (_d["gender"] == "female" and _d["pol"] == 'ж')
         assert pol, f'{_id}-Проверте пол пациента'
-    soc = int( _d.get("soc", 0) )
+
+    soc = int( _d.get("soc", 0) or 0 )
     assert soc in PAC_SOC, f'{_id}-Неверный код SOC статуса пациента'
     _d["soc"] = _fmt_000(soc)
 

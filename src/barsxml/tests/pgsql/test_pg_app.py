@@ -70,7 +70,9 @@ def test_make_method(config, xml):
     _dbc = config.sql_srv
     try:
         #def make_xml(self, limit: int, mark_sent: bool, get_fresh: bool, check=False, sign=False) -> Tuple[int, int, str, int]:
-        _rc, _pc, zname, errors = xml.make_xml(limit, mark_sent, get_fresh, check, sign_xml)
+        _rc, _pc, zname, errors = xml.make_xml(
+            limit, mark_sent, get_fresh, check, sign_xml
+        )
 
         log = f"""\nAPPLICATION:
           DB: {_dbc['dbname']}, SHEMA: {_dbc['schema']}
