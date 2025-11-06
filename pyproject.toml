@@ -1,6 +1,16 @@
-[build-system]
-requires = [
-    "setuptools >= 56.1.0",
-    "wheel >= 0.36.2"
+[project]
+name = "barsxml"
+version = "0.1.0"
+description = "Barsxml library for task_rest"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+  "psycopg2-binary==2.9.11",
+  "requests==2.27.1",
 ]
-build-backend = "setuptools.build_meta"
+
+[dependency-groups]
+dev = [
+  "pytest==6.2.5",
+  "pytest-env"
+]

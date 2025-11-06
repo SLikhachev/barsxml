@@ -104,7 +104,9 @@ class DataDict(UserDict):
                 ds = self["ds1"][0].upper()
                 dsm = ds_inokray_atu.match(ds)
                 if dsm is not None:
-                    return '1.3'
+                    # here had been tetsted by hands 1.0 - for inokraevoy (active visit)
+                    # Активное посещение для инокраевых
+                    return '1.0'
                 # Такой диагноз Zxx
                 dsm = ds_inokray_z.match(ds)
                 if dsm is not None:
