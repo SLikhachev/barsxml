@@ -24,7 +24,7 @@ class XmlSigner:
 
     # all files have fixed names
     PEM_FILES = {
-        'crt': 'crt.der', # pub key certificate
+        'crt': 'crt.pem', # pub key certificate
         'key': 'key.pem', # priv key pem file
         'ca': 'ca.pem', # CA auth pem file (may be in chain)
     }

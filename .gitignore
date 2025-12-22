@@ -4,6 +4,7 @@ __pycache__/
 barsxml.egg-info/
 build/
 dist/
+elsign/
 *.py[cod]
 .idea/
 pytest/
