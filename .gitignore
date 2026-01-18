@@ -5,11 +5,10 @@ barsxml.egg-info/
 build/
 dist/
 elsign/
-*.py[cod]
-.idea/
 pytest/
+foms/
+*.py[cod]
 *.txt
-*.komodoproject
 !requirements.txt
 pytest_hokuto.ini
 run_tests.sh

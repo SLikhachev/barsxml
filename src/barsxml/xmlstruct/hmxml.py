@@ -25,7 +25,7 @@ Nodes defines as:
     Ignored nodes may be skipped, enumerates in
     IGNORED = ('ignored_node_1', 'ignored_node_2', ...)
 
-    Nodes with constatnt text values enumerates as:
+    Nodes with constant text values enumerates as:
     CONST={
         'node_tag_1': 'node_value_1',
         'node_tag_2': 'node_value_2',
@@ -72,6 +72,7 @@ HmStruct = SN(
         'month',
         'nschet',
         'dschet',
+        'plat',
         'summav',
     )),
 
@@ -95,7 +96,9 @@ HmStruct = SN(
             'mse',  # ignore
             'novor',
             'vnov_d',  # ignore
-            'soc'
+            'soc', # CBO default 0
+            'mo_pr', # MO pacient attached
+            'vz'  # kind of where patient works just now
         )),
 
         ('z_sl', (
@@ -105,6 +108,7 @@ HmStruct = SN(
             'for_pom',  # in tal.for_pom only urgent if set
             'npr_mo',  # tal.npr_mo
             'npr_date',  # tal.npr_date
+            'npr_num', # tal.npr_num ignore yet
             'lpu',  # self.lpu
             'date_z_1',  # tal.open_date
             'date_z_2',  # tal.close_date
@@ -117,12 +121,14 @@ HmStruct = SN(
 
             ('sl', (
                 'sl_id',  # self
-                'lpu_1',  # data.lpu_1 # ignore yet
+                'lpu_1',  # data.lpu_1
                 'podr',  # data.podr # ignore yet
                 'profil',  # data.profil
+                'profil_m', # const yet
                 'profil_k',  # tal.prof_k
                 'det',
                 'p_cel',  # self.p_cel
+                'mop', # where pacient was received
                 'nhistory',  # data.nhistory
                 'p_per',  # DS 1
                 'date_1',  # data.date_1
@@ -171,6 +177,7 @@ HmStruct = SN(
                     'lpu_1',  # ignore
                     'podr',  # ignore
                     'profil',
+                    'profil_m',
                     'vid_vme',
                     'det',
                     'date_in',
@@ -205,6 +212,7 @@ HmStruct = SN(
         #'npolis',  # crd.polis_num
         'novor',
         'soc',
+        'vz',
 
         ## Z_sl
         'idcase',
@@ -222,6 +230,7 @@ HmStruct = SN(
         ## Sl
         'sl_id',
         'profil',
+        'profil_m',
         'det',
         'nhistory',
         'date_1',
@@ -238,14 +247,16 @@ HmStruct = SN(
         'inv',
         'mse',
         'vnov_d',
+        #'vz'
 
         ## Z_sl
         #'kd_z', # tal. # just ignore yet
+        'npr_num', # tal.npr_num
         'vnov_m',
         'vb_p',
 
         ## Sl
-        'lpu_1', # data.lpu_1 # ignore yet
+        # 'lpu_1', # data.lpu_1 # ignore yet
         # 'podr',  # data.podr # ignore yet
 
         ## Sl DS
@@ -261,10 +272,28 @@ HmStruct = SN(
         'tarif',
     ),
     CONST={
-        'version': '5.0',
+        'version': '6.0',
         'sl_id': 1,
         'vers_spec': 'V021',
+
+        # this 'PLAT' is a STUB value if it required let be so
+        # Поскольку я сдааю все записи подряд, не сортирую по
+        # СМО, просто тупо ставим попало, напимер это
+        'plat': '25011',
         'novor': 0,
+
+        # LPU_1 взял из ЕРМО нашей конторы на сайте ЕРМО
+        # Такой код есть к стати и в справочнике F033
+        # правда там не написано, что это Хокуто
+        'lpu_1': '25202607000001001',
+
+        # МОП где приняли пациента
+        # 1 - Поликлиника или ее подразделы
+        'mop': 1,
+
+        # Профиль услуги у нас 76 - рентгенология
+        # этот профиль выбрал 31 - радиология
+        'profil_m': 31,
     },
     COUNTABLE={
         'usl':'idserv',

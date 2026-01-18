@@ -83,7 +83,7 @@ class BarsXml(XmlReport):
             except Exception as err:
                 # print(rdata_row)
                 # print(self.sql.spec_usl)
-                #raise err
+                # raise err
                 # write error to the file
                 self.xml_writer.write_error(f'{idcase}-{err}\n')
                 self.sql.set_error(idcase, card, str(err))

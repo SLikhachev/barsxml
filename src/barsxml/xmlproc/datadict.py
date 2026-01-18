@@ -1,4 +1,8 @@
-""" Data Dict class definition """
+""" Data Dict class definition
+
+ DB Record is described in ../sql/SELECT_RECORD.sql
+
+"""
 
 ##
 import re
@@ -38,7 +42,7 @@ class DataDict(UserDict):
         return self
 
     def hm_data_attrs(self):
-        """ calculate ZAP fields
+        """ calculate several ZAP fields
             self: dict
         """
 
@@ -105,6 +109,7 @@ class DataDict(UserDict):
                 dsm = ds_inokray_atu.match(ds)
                 if dsm is not None:
                     # here had been tetsted by hands 1.0 - for inokraevoy (active visit)
+                    # tested in oct,nov 2025
                     # Активное посещение для инокраевых
                     return '1.0'
                 # Такой диагноз Zxx

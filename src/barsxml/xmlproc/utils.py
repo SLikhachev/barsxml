@@ -1,14 +1,16 @@
-
-""" The module contains a base checks/validators
+""" The module contains a base checks/validators/calculators
     for main record to produce xmls
 """
 
+# from collections import namedtuple
 from types import SimpleNamespace
 import re
 from functools import reduce
+from datetime import date
+
 
 # XRAY, UZI (ultra sonic reserach), ENDOSCOPY, LABGENETICS, GISTOLoGY
-# PROFIL med profils to interrest us
+# PROFIL med profils as of V002
 USL_PROF = (78, 106, 123, 40, 15)
 
 # SPECFIC med speciality to interrest
@@ -20,13 +22,13 @@ USL_PRVS = (31, 48, 60, 81, 93)
 # PURP diagnostic purpose
 USL_PURP = (4,)
 
-# PURP pofosmotr purpose
+# PURP profosmotr purpose
 PROFOSM_PURP = (21, 22)
 
 # PROFIL stomatology prifil
 STOM_PROF = (85, 86, 87, 88, 89, 90)
 
-# PROFIL
+# PROFIL nurses
 SESTRY_PROF = (82, 83)
 
 # IDSP Pay profil
@@ -35,9 +37,24 @@ ED_COL_IDSP = (25, 28, 29)
 REGION = '250'
 SMO_OK = "05000"
 
-# pacient status 0 -none 35-svo solder 65- svo solder's family member
+# pacient CBO status 0 -none 35-svo solder 65- svo solder's family member
 PAC_SOC = (0, 35, 65)
 
+# Pacient VZ status
+#vz_age=NamedTuple('vz', 'age')
+STUDENT=24
+WORKER=65
+PAC_VZ = {
+    "worker": 1,
+    "solder": 2,
+    "retired": 3,
+    "student": 4,
+    "unemployed": 5,
+    "other":6
+}
+
+SNILS = r'^\d{3}-\d{3}-\d{3} \d\d$'
+IDDOKT = r'^\d{11}$'
 
 class RowObject(SimpleNamespace):
     """ class """
@@ -97,9 +114,6 @@ class RowObject(SimpleNamespace):
 
         # Iterate over the ODBC row data object and set each attribute
         reduce(attrs, data.cursor_description, 0)
-
-SNILS = r'^\d{3}-\d{3}-\d{3} \d\d$'
-IDDOKT = r'^\d{11}$'
 
 def _iddokt(_id: str, snils: str):
     """
@@ -378,8 +392,10 @@ def _doct(_id: str, _d: dict):
     crd.dul_serial as docser,
     crd.dul_number as docnum,
     crd.dul_date as docdate,
-    crd.dul_org as docorg
-    crd.soc
+    crd.dul_org as docorg,
+    crd.mo_att,
+    crd.soc,
+    crd.vz
 """
 
 def _pac_name(_id: str, _d: dict):
@@ -411,14 +427,37 @@ def _pac_doc(_id: str, _d: dict):
                 f'{_id}-Номер паспорта не 6 цифр'
 
     # local person no doc_date doc_org needed
+    # AND set MO_PR if any
+    _d["mo_pr"] = None
     if _d["smo_ok"] == SMO_OK:
         _d["docdate"], _d["docorg"] = None, None
+
+        # assert mo_att is set
+        assert _d["mo_att"], f'{_id}-Укажите код МО прикрепления пациента'
+        _d["mo_pr"] = f'{REGION}{_d["mo_att"]}'
+
     # self.os_sluch= 2 if self.dost.find('1') > 0 else None
+
+def _pac_vz(_id: str, _d: dict):
+    """ Calculate Vid zanyatosti """
+    if _d.get("vz", None) and _d["vz"] in PAC_VZ.values():
+        return
+    # date_birth = datetime.strptime(_d["dr"], '%Y-%m-%d').date()
+    assert isinstance(_d["dr"], date), f'{_id}-Дата рождения должна быть экземпляром класса date'
+    today= date.today()
+    age = today.year - _d["dr"].year - ((today.month, today.day) < (_d["dr"].month, _d["dr"].day))
+    _d["vz"]= PAC_VZ["retired"]
+    if STUDENT > age:
+        _d["vz"] = PAC_VZ["student"]
+    elif WORKER > age:
+        _d["vz"] = PAC_VZ["worker"]
+    # print(f'{age}-Возраст {_d["vz"]}- VZ')
 
 def _d_type(_id: str, _d: dict):
     _d["d_type"] = None
     if _d.get("ot", None) is None:
         _d["d_type"] = 5
+
 
 def data_checker(data: dict, this_mo: int, napr_mo: int):# -> dict:
     """ data checker """
@@ -439,6 +478,7 @@ def data_checker(data: dict, this_mo: int, napr_mo: int):# -> dict:
         _doct,
         _pac_name,
         _pac_doc,
+        _pac_vz,
         _d_type,
     )
     for func in fns:

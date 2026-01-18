@@ -67,15 +67,21 @@ def test_make_method(config, xml):
     get_fresh = os.getenv('GET_FRESH') or False
 
     limit = int(limit)
+    print (f"""\nTEST CONFIG:
+        limit={limit}, check={check},
+        mark_sent={mark_sent}, get_fresh={get_fresh}""")
+
     _dbc = config.sql_srv
     try:
-        #def make_xml(self, limit: int, mark_sent: bool, get_fresh: bool, check=False, sign=False) -> Tuple[int, int, str, int]:
+        #def make_xml(self,
+        # limit: int, mark_sent: bool, get_fresh: bool, check=False, sign=False)
+        # -> Tuple[int, int, str, int]:
         _rc, _pc, zname, errors = xml.make_xml(
             limit, mark_sent, get_fresh, check, sign_xml
         )
 
         log = f"""\nAPPLICATION:
-          DB: {_dbc['dbname']}, SHEMA: {_dbc['schema']}
+          DB: {_dbc['dbname']}, SCHEMA: {_dbc['schema']}
           HPM_records={_rc}
           LM_records={_pc}
           ZIP_file_name={zname},
@@ -86,3 +92,4 @@ def test_make_method(config, xml):
         print(f'Processing time {(time2-time1).seconds} sec')
     except Exception as exc:
         print(f"The test make method exception: {exc}")
+        raise exc
