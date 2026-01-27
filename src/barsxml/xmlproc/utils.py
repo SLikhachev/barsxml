@@ -426,14 +426,14 @@ def _pac_doc(_id: str, _d: dict):
             assert re.fullmatch(r'^\d{6}$', _d["docnum"]), \
                 f'{_id}-Номер паспорта не 6 цифр'
 
-    # local person no doc_date doc_org needed
+    # for local person doc_date doc_org do not needed
     # AND set MO_PR if any
-    _d["mo_pr"] = None
+    _d["mo_pr"] = None # Inokraevoy
     if _d["smo_ok"] == SMO_OK:
         _d["docdate"], _d["docorg"] = None, None
 
-        # assert mo_att is set
-        assert _d["mo_att"], f'{_id}-Укажите код МО прикрепления пациента'
+        # assert mo_att is set for local pacient
+        assert _d.get("mo_att", None), f'{_id}-Укажите код МО прикрепления пациента'
         _d["mo_pr"] = f'{REGION}{_d["mo_att"]}'
 
     # self.os_sluch= 2 if self.dost.find('1') > 0 else None

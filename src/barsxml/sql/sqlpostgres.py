@@ -15,7 +15,7 @@ class SqlProvider(SqlBase):
         # self.cfg= config # set by the base calss
 
         dbc =  getattr(config, 'sql_srv', {})
-        #print(f'{dbc["dbname"]} {dbc["user"]} {dbc["password"]}')
+        #print(f'sql {dbc}')
         try:
             self._db = psycopg2.connect(
                 port=dbc.get('port', 5432),

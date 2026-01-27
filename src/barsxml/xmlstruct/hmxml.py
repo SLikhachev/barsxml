@@ -174,7 +174,7 @@ HmStruct = SN(
                 ('usl', (
                     'idserv',
                     'lpu',  # self.lpu
-                    'lpu_1',  # ignore
+                    'lpu_1',
                     'podr',  # ignore
                     'profil',
                     'profil_m',
