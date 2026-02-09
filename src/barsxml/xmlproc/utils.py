@@ -38,8 +38,14 @@ REGION = '250'
 SMO_OK = "05000"
 
 # pacient CBO status 0 -none 35-svo solder 65- svo solder's family member
-PAC_SOC = (0, 35, 65)
-
+PAC_SOC = (
+    '000', # категория отсутствует;
+    '035', # участник специальной военной операции (СВО), уволенный в запас (отставку);
+    '065', # член семьи участника специальной военной операции (СВО);
+    '810', # инвалид I группы;
+    '813', # инвалид I группы участник специальной военной операции (СВО);
+    '816'  # инвалид I группы член семьи участника специальной военной операции (СВО)
+)
 # Pacient VZ status
 #vz_age=NamedTuple('vz', 'age')
 STUDENT=24
@@ -398,7 +404,7 @@ def _doct(_id: str, _d: dict):
     crd.vz
 """
 
-def _pac_name(_id: str, _d: dict):
+def _pac_name_soc(_id: str, _d: dict):
     assert _d["fam"], f'{_id}-Нет Фамилии пациента'
     assert _d["dr"], f'{_id}-Нет даты рождения пациента'
     # check geneder
@@ -407,9 +413,11 @@ def _pac_name(_id: str, _d: dict):
         pol = (_d["gender"] == "male" and _d["pol"] == 'м') or (_d["gender"] == "female" and _d["pol"] == 'ж')
         assert pol, f'{_id}-Проверте пол пациента'
 
-    soc = int( _d.get("soc", 0) or 0 )
-    assert soc in PAC_SOC, f'{_id}-Неверный код SOC статуса пациента'
-    _d["soc"] = _fmt_000(soc)
+    soc = _d.get("soc", None)
+    if soc is None:
+        soc = "000"
+    assert soc in PAC_SOC, f'{_id}:{soc}-Неверный код SOC статуса пациента'
+    _d["soc"] = soc
 
 def _pac_doc(_id: str, _d: dict):
     if _d["vpolis"] != 3 or _d["smo_ok"] != SMO_OK:
@@ -476,7 +484,7 @@ def data_checker(data: dict, this_mo: int, napr_mo: int):# -> dict:
         _naprav_hosp,
         _diag,
         _doct,
-        _pac_name,
+        _pac_name_soc,
         _pac_doc,
         _pac_vz,
         _d_type,
