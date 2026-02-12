@@ -124,7 +124,7 @@ HmStruct = SN(
                 'lpu_1',  # data.lpu_1
                 'podr',  # data.podr # ignore yet
                 'profil',  # data.profil
-                'profil_m', # const yet
+                #'profil_m', # const yet ignore
                 'profil_k',  # tal.prof_k
                 'det',
                 'p_cel',  # self.p_cel
@@ -177,7 +177,7 @@ HmStruct = SN(
                     'lpu_1',
                     'podr',  # ignore
                     'profil',
-                    'profil_m',
+                    #'profil_m', #ignore
                     'vid_vme',
                     'det',
                     'date_in',
@@ -230,7 +230,7 @@ HmStruct = SN(
         ## Sl
         'sl_id',
         'profil',
-        'profil_m',
+        #'profil_m',
         'det',
         'nhistory',
         'date_1',
