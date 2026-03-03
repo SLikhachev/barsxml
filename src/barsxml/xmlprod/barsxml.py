@@ -16,7 +16,9 @@ class BarsXml(XmlReport):
 
     __slots__ = ('cfg', 'data_dict', 'sql', 'xml_writer')
 
-    def __init__(self, config: object, pack_type: str, mo_code: str, month: str, pack_num: int):
+    def __init__(self,
+        config: object, pack_type: str, mo_code: str, month: str, pack_num: int,
+    ):
         """
             @params
             :config: object(
@@ -41,8 +43,12 @@ class BarsXml(XmlReport):
         # init XML writer object
         self.xml_writer = XmlWriter(self.cfg)
 
-
-    def make_xml(self, limit: int, mark_sent: bool, get_fresh: bool, check=False, sign=False) -> Tuple[int, int, str, int]:
+    def make_xml(
+        self, limit: int, mark_sent: bool, get_fresh: bool,
+        check=False, sign=False,
+        # NPR_MO this param is used for tests purpose at the moment
+        npr_mo: int = 0
+    ) -> Tuple[int, int, str, int]:
         """ main class method
             @params
             :limit: int - number of recorde to select from sql table as LIMIT sql clause
@@ -58,7 +64,7 @@ class BarsXml(XmlReport):
         #self.sql.get_all_usp()
         #self.sql.get_all_usl()
 
-        rdata = self.sql.get_hpm_data(get_fresh)
+        rdata = self.sql.get_hpm_data(get_fresh, npr_mo)
         limit = abs(int(limit))
 
         # total records, errors

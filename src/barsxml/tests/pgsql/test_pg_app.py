@@ -65,6 +65,7 @@ def test_make_method(config, xml):
     check = os.getenv('CHECK_ONLY') or False
     mark_sent = os.getenv('MARK_SENT') or False
     get_fresh = os.getenv('GET_FRESH') or False
+    npr_mo = os.getenv('NPR_MO') or 0
 
     limit = int(limit)
     print (f"""\nTEST CONFIG:
@@ -77,7 +78,8 @@ def test_make_method(config, xml):
         # limit: int, mark_sent: bool, get_fresh: bool, check=False, sign=False)
         # -> Tuple[int, int, str, int]:
         _rc, _pc, zname, errors = xml.make_xml(
-            limit, mark_sent, get_fresh, check, sign_xml
+            limit, mark_sent, get_fresh, check, sign_xml,
+            int(npr_mo)
         )
 
         log = f"""\nAPPLICATION:
