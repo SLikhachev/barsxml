@@ -92,11 +92,23 @@ class SqlProvider(SqlBase):
         self.qurs1.execute(pg.GET_MALE_NAMES)
         self.male_names = list( rec.name for rec in self.qurs1.fetchall() )
 
-    def get_hpm_data(self, get_fresh: bool) -> object:
+    def get_hpm_data(self, get_fresh: bool, npr_mo: int=0) -> object:
         """ return rows iterator """
-        self.qurs.execute(
-            pg.GET_HPM_DATA,
-            (self.talon_tbl, self.int_month, get_fresh))
+        if npr_mo > 0:
+            fresh = '=1' if get_fresh else '>0'
+            _data = pg.GET_HPM_BY_MO.format(
+                talon_tbl=self.talon_tbl,
+                int_month=self.int_month,
+                fresh=fresh,
+                npr_mo=npr_mo
+            )
+        else:
+            _data = pg.GET_HPM_DATA.format(
+                talon_tbl=self.talon_tbl,
+                int_month=self.int_month,
+                get_fresh=get_fresh
+            )
+        self.qurs.execute(_data)
         return self.qurs.fetchall()
 
     def get_npr_mo(self, data: dict) -> int:
